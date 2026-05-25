@@ -11,11 +11,12 @@ const { generateAIShortlist } = require('../services/gemini');
 // POST /api/drives — TPO posts a new drive
 router.post('/', authenticateToken, requireTpo, async (req, res) => {
   try {
-    const drive = new Drive({ ...req.body, postedBy: req.user.id, college: req.user.college });
+    const driveCollege = (req.user.college || '').trim();
+    const drive = new Drive({ ...req.body, postedBy: req.user.id, college: driveCollege });
     await drive.save();
 
     // Auto-notify all students at this college
-    const students = await Student.find({ college: { $regex: new RegExp('^' + req.user.college.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }, profileCompleted: true });
+    const students = await Student.find({ college: { $regex: new RegExp('^' + driveCollege.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }, profileCompleted: true });
     const notifications = students.map(s => {
       const match = calculateMatch(s.skills, drive.requiredSkills);
       return {
@@ -38,7 +39,8 @@ router.post('/', authenticateToken, requireTpo, async (req, res) => {
 // GET /api/drives/college/:college — drives for a college (students use this)
 router.get('/college/:college', async (req, res) => {
   try {
-    const drives = await Drive.find({ college: { $regex: new RegExp('^' + req.params.college.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } }).sort({ driveDate: 1 });
+    const collegeName = (req.params.college || '').trim();
+    const drives = await Drive.find({ college: { $regex: new RegExp('^' + collegeName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } }).sort({ driveDate: 1 });
     res.json(drives);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch drives.' });

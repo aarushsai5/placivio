@@ -104,8 +104,17 @@ export default function Setup() {
       await createStudent(studentData);
       await generateRoadmap(studentId);
       localStorage.setItem('placivio_studentId', studentId);
+      
+      // Update auth context with new profile data
+      const { getMe } = await import('../services/api');
+      const { data: updatedUser } = await getMe();
+      const currentToken = localStorage.getItem('placivio_token');
+      // Actually we need to call login to update context, let's extract login and token from useAuth at top of component.
+      // Wait, we can't extract it here, we have to do it at the component level.
+      // Let's just reload the page to Dashboard so auth context initializes cleanly!
+      
       addToast('Your personalized roadmap is ready! 🎉', 'success');
-      navigate(`/dashboard/${studentId}`);
+      window.location.href = `/dashboard/${studentId}`;
     } catch (error) {
       console.error('Setup error:', error);
       addToast(error.response?.data?.error || 'Something went wrong. Please try again.', 'error');
