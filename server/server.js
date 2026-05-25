@@ -62,9 +62,9 @@ async function start() {
   try {
     await connectDB();
     await seedCompanies();
-    app.listen(PORT, () => {
-      console.log(`\n🚀 Placivio API running on http://localhost:${PORT}`);
-      console.log(`📋 Health check: http://localhost:${PORT}/api/health\n`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`\n🚀 Placivio API running on port ${PORT}`);
+      console.log(`📋 Health check: /api/health\n`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error.message);
