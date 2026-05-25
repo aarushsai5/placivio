@@ -23,12 +23,16 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: true,
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 
 // Health check
+app.get('/', (req, res) => {
+  res.send('Placivio API is running! 🚀 Visit /api/health for status.');
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Placivio API is running 🚀', timestamp: new Date().toISOString() });
 });
