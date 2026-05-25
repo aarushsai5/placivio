@@ -45,14 +45,35 @@ export default function Setup() {
   };
 
   const addSkill = (skill) => {
-    const trimmed = skill.trim();
-    if (trimmed && !form.skills.includes(trimmed)) {
-      updateForm('skills', [...form.skills, trimmed]);
+    const parts = skill.split(/[,,;]/).map(s => s.trim()).filter(Boolean);
+    const newSkills = [...form.skills];
+    let updated = false;
+    parts.forEach(p => {
+      if (!newSkills.includes(p)) {
+        newSkills.push(p);
+        updated = true;
+      }
+    });
+    if (updated) {
+      updateForm('skills', newSkills);
     }
   };
 
   const removeSkill = (skill) => {
     updateForm('skills', form.skills.filter(s => s !== skill));
+  };
+
+  const handleSkillInputChange = (e) => {
+    const value = e.target.value;
+    if (value.endsWith(',')) {
+      const skill = value.slice(0, -1).trim();
+      if (skill) {
+        addSkill(skill);
+      }
+      setSkillInput('');
+    } else {
+      setSkillInput(value);
+    }
   };
 
   const handleSkillInputKeyDown = (e) => {
@@ -216,7 +237,7 @@ export default function Setup() {
                 <input
                   type="text"
                   value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
+                  onChange={handleSkillInputChange}
                   onKeyDown={handleSkillInputKeyDown}
                   placeholder="Type a skill and press Enter"
                   className="input-field"

@@ -17,6 +17,7 @@ const applicationsRouter = require('./routes/applications');
 const notificationsRouter = require('./routes/notifications');
 const achievementsRouter = require('./routes/achievements');
 const tpoRouter = require('./routes/tpo');
+const seedRouter = require('./routes/seed');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -54,6 +55,7 @@ app.use('/api/applications', applicationsRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/achievements', achievementsRouter);
 app.use('/api/tpo', tpoRouter);
+app.use('/api/seed', seedRouter);
 
 // Global error handler
 app.use((err, req, res, next) => {

@@ -17,11 +17,39 @@ export default function PostDrive() {
     driveType: 'oncampus', description: '',
   });
 
-  const addSkill = () => {
-    const s = skillInput.trim();
-    if (s && !form.requiredSkills.includes(s)) {
-      setForm({ ...form, requiredSkills: [...form.requiredSkills, s] });
+  const addSkill = (skillText = skillInput) => {
+    const parts = skillText.split(/[,,;]/).map(s => s.trim()).filter(Boolean);
+    const newSkills = [...form.requiredSkills];
+    let updated = false;
+    parts.forEach(p => {
+      if (!newSkills.includes(p)) {
+        newSkills.push(p);
+        updated = true;
+      }
+    });
+    if (updated) {
+      setForm({ ...form, requiredSkills: newSkills });
+    }
+    setSkillInput('');
+  };
+
+  const handleSkillInputChange = (e) => {
+    const value = e.target.value;
+    if (value.endsWith(',')) {
+      const skill = value.slice(0, -1).trim();
+      if (skill) {
+        addSkill(skill);
+      }
       setSkillInput('');
+    } else {
+      setSkillInput(value);
+    }
+  };
+
+  const handleSkillInputKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addSkill(skillInput);
     }
   };
 
@@ -89,10 +117,10 @@ export default function PostDrive() {
           <div>
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">Required Skills</label>
             <div className="flex gap-2 mb-2">
-              <input type="text" value={skillInput} onChange={e => setSkillInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } }}
+              <input type="text" value={skillInput} onChange={handleSkillInputChange}
+                onKeyDown={handleSkillInputKeyDown}
                 placeholder="Type a skill and press Enter" className="input-field flex-1" />
-              <button type="button" onClick={addSkill} className="btn-secondary px-4">Add</button>
+              <button type="button" onClick={() => addSkill()} className="btn-secondary px-4">Add</button>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {form.requiredSkills.map(s => (
