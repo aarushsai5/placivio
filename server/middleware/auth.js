@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'placivio_jwt_secret_2024';
+const JWT_SECRET = process.env.JWT_SECRET?.trim() || 'placivio_jwt_secret_2024';
 
 function generateToken(user, userType) {
   return jwt.sign(
