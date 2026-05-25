@@ -37,6 +37,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Placivio API is running 🚀', timestamp: new Date().toISOString() });
 });
 
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Placivio backend running' });
+});
+
 // Mount routes
 app.use('/api/auth', authRouter);
 app.use('/api/students', studentsRouter);
