@@ -36,7 +36,7 @@ export const getDashboard = (studentId) => apiClient.get(`/dashboard/${studentId
 export const sendChatMessage = (studentId, message) => apiClient.post(`/chat/${studentId}`, { message });
 
 // ── Companies ──
-export const getCompanyMatches = (studentId) => apiClient.get(`/companies/matches/${studentId}`);
+export const getCompanyMatches = (studentId) => apiClient.get(`/companies/match/${studentId}`);
 
 // ── Drives ──
 export const getDrivesForCollege = (college) => apiClient.get(`/drives/college/${encodeURIComponent(college)}`);

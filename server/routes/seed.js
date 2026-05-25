@@ -10,6 +10,20 @@ const Roadmap = require('../models/Roadmap');
 const Progress = require('../models/Progress');
 const seedCompanies = require('../seeds/companies');
 
+const firstNames = ['Aarav', 'Diya', 'Kabir', 'Ananya', 'Rohan', 'Sneha', 'Vikram', 'Priya', 'Rahul', 'Neha', 'Arjun', 'Kavya', 'Aditya', 'Ishita', 'Karan', 'Riya', 'Sameer', 'Shruti', 'Varun', 'Tanvi', 'Abhishek', 'Meera', 'Rishabh', 'Aarti', 'Yash'];
+const lastNames = ['Sharma', 'Patel', 'Singh', 'Iyer', 'Verma', 'Reddy', 'Kumar', 'Das', 'Gupta', 'Jain', 'Mehta', 'Bose', 'Chaudhary', 'Nair', 'Menon', 'Rao', 'Yadav', 'Pandey', 'Desai', 'Kaur'];
+const possibleSkills = ['React', 'Node.js', 'JavaScript', 'SQL', 'DSA', 'Git', 'Python', 'Java', 'Aptitude', 'Communication', 'C++', 'Embedded Systems', 'HTML/CSS', 'System Design', 'Docker', 'AWS', 'Machine Learning'];
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomSkills() {
+  const count = getRandomInt(3, 7);
+  const shuffled = [...possibleSkills].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
 // POST /api/seed - Seeds fresh simulation data
 router.post('/', async (req, res) => {
   try {
@@ -52,69 +66,33 @@ router.post('/', async (req, res) => {
     await adminTpo.save();
     console.log('🎓 Seeded TPO and Admin accounts.');
 
-    // Seed Students
-    const studentsData = [
-      {
-        name: 'Aarav Sharma',
-        email: 'aarav@student.edu',
+    // Generate 25 Students
+    const studentsData = [];
+    for (let i = 0; i < 25; i++) {
+      const fName = firstNames[i];
+      const lName = lastNames[getRandomInt(0, lastNames.length - 1)];
+      const cgpa = (getRandomInt(50, 98) / 10).toFixed(1);
+      
+      let targetType = ['Service Based'];
+      if (cgpa > 8) targetType = ['Product Based', 'Startup'];
+      else if (cgpa > 7) targetType = ['Product Based', 'Service Based'];
+      
+      studentsData.push({
+        name: `${fName} ${lName}`,
+        email: `${fName.toLowerCase()}@student.edu`,
         password: 'password123',
         college: 'VIT Vellore',
-        branch: 'CSE',
+        branch: ['CSE', 'IT', 'ECE', 'ME'][getRandomInt(0, 3)],
         semester: '7th',
-        cgpa: 9.2,
-        skills: ['React', 'Node.js', 'JavaScript', 'SQL', 'DSA', 'Git'],
-        targetCompanies: ['Google', 'Microsoft', 'Razorpay'],
-        targetCompanyType: ['Product Based', 'Startup'],
-        timeline: '6 months',
+        cgpa: parseFloat(cgpa),
+        skills: getRandomSkills(),
+        targetCompanies: ['TCS', 'Infosys', 'Google', 'Microsoft'].sort(() => 0.5 - Math.random()).slice(0, 2),
+        targetCompanyType: targetType,
+        timeline: ['3 months', '6 months', '1 year'][getRandomInt(0, 2)],
         profileCompleted: true,
-        placementScore: 85
-      },
-      {
-        name: 'Diya Patel',
-        email: 'diya@student.edu',
-        password: 'password123',
-        college: 'VIT Vellore',
-        branch: 'CSE',
-        semester: '7th',
-        cgpa: 8.5,
-        skills: ['Python', 'Java', 'SQL', 'Aptitude', 'Communication'],
-        targetCompanies: ['TCS', 'Infosys', 'Accenture'],
-        targetCompanyType: ['Service Based'],
-        timeline: '6 months',
-        profileCompleted: true,
-        placementScore: 60
-      },
-      {
-        name: 'Kabir Singh',
-        email: 'kabir@student.edu',
-        password: 'password123',
-        college: 'VIT Vellore',
-        branch: 'ECE',
-        semester: '7th',
-        cgpa: 7.8,
-        skills: ['C++', 'Embedded Systems', 'Aptitude', 'Communication', 'Python'],
-        targetCompanies: ['Wipro', 'Deloitte'],
-        targetCompanyType: ['Service Based'],
-        timeline: '1 year',
-        profileCompleted: true,
-        placementScore: 50
-      },
-      {
-        name: 'Ananya Iyer',
-        email: 'ananya@student.edu',
-        password: 'password123',
-        college: 'VIT Vellore',
-        branch: 'IT',
-        semester: '7th',
-        cgpa: 6.8,
-        skills: ['HTML/CSS', 'JavaScript', 'React', 'Communication'],
-        targetCompanies: ['Zomato', 'Paytm'],
-        targetCompanyType: ['Startup'],
-        timeline: '3 months',
-        profileCompleted: true,
-        placementScore: 45
-      }
-    ];
+        placementScore: getRandomInt(40, 95)
+      });
+    }
 
     const seededStudents = [];
     for (const data of studentsData) {
@@ -124,126 +102,30 @@ router.post('/', async (req, res) => {
     }
     console.log(`👨‍🎓 Seeded ${seededStudents.length} student accounts.`);
 
-    // Seed mock roadmaps for the students
-    // Aarav Sharma's roadmap
-    const aaravRoadmap = new Roadmap({
-      studentId: seededStudents[0]._id,
-      placementScore: 85,
-      scoreReason: 'Great fundamental coding skills, strong project experience in React/Node.js, and excellent academic record (CGPA 9.2). Needs focus on advanced System Design and high-scale system patterns.',
-      skillGaps: ['System Design', 'Docker', 'AWS'],
-      immediateActions: [
-        'Read System Design Primer and understand horizontal scaling',
-        'Deploy a project using Docker containers',
-        'Learn basic AWS services (EC2, S3, RDS)'
-      ],
-      encouragement: 'You are in a prime position for product-based roles. Refine your advanced architectural skills to ace top-tier interviews!',
-      totalWeeks: 4,
-      weeks: [
-        {
-          weekNumber: 1,
-          topic: 'Advanced Data Structures & Algorithms',
-          skills: ['Graphs', 'Dynamic Programming', 'Tries'],
-          estimatedHours: 15,
-          completed: true,
-          completedAt: new Date(Date.now() - 10 * 86400000),
-          resources: [
-            { title: 'LeetCode Graph Patterns', url: 'https://leetcode.com', type: 'practice' },
-            { title: 'Dynamic Programming Playlist', url: 'https://youtube.com', type: 'video' }
-          ]
-        },
-        {
-          weekNumber: 2,
-          topic: 'System Design Fundamentals',
-          skills: ['Load Balancers', 'Caching', 'Database Sharding'],
-          estimatedHours: 12,
-          completed: false,
-          resources: [
-            { title: 'System Design Primer', url: 'https://github.com/donnemartin/system-design-primer', type: 'reading' }
-          ]
-        },
-        {
-          weekNumber: 3,
-          topic: 'Containerization & DevOps Basics',
-          skills: ['Docker', 'CI/CD Pipelines'],
-          estimatedHours: 10,
-          completed: false,
-          resources: [
-            { title: 'Docker for Beginners', url: 'https://docker.com', type: 'reading' }
-          ]
-        },
-        {
-          weekNumber: 4,
-          topic: 'Cloud Infrastructure & Deployment',
-          skills: ['AWS', 'Serverless Functions'],
-          estimatedHours: 10,
-          completed: false,
-          resources: [
-            { title: 'AWS Cloud Practitioner Guide', url: 'https://aws.amazon.com', type: 'reading' }
-          ]
-        }
-      ]
-    });
-    await aaravRoadmap.save();
-
-    // Diya Patel's roadmap
-    const diyaRoadmap = new Roadmap({
-      studentId: seededStudents[1]._id,
-      placementScore: 60,
-      scoreReason: 'Strong foundation in Python and SQL. Needs to master core Java concepts, object-oriented design, and practice aptitude tests for service-based MNC screenings.',
-      skillGaps: ['Java', 'Aptitude Practice', 'Object-Oriented Design'],
-      immediateActions: [
-        'Complete Java Object-Oriented programming tutorials',
-        'Solve 5 quantitative aptitude questions daily',
-        'Build a small Java-based console application'
-      ],
-      encouragement: 'Your backend logic is solid. Focus on standard MNC placement patterns, and you will easily clear the first rounds!',
-      totalWeeks: 4,
-      weeks: [
-        {
-          weekNumber: 1,
-          topic: 'Core Java & OOPs Concepts',
-          skills: ['Inheritance', 'Polymorphism', 'Interfaces'],
-          estimatedHours: 12,
-          completed: true,
-          completedAt: new Date(Date.now() - 5 * 86400000),
-          resources: [
-            { title: 'Java OOPs Explained', url: 'https://geeksforgeeks.org', type: 'reading' }
-          ]
-        },
-        {
-          weekNumber: 2,
-          topic: 'Quantitative & Logical Aptitude',
-          skills: ['Percentages', 'Time & Work', 'Puzzles'],
-          estimatedHours: 15,
-          completed: false,
-          resources: [
-            { title: 'IndiaBIX Aptitude Practice', url: 'https://indiabix.com', type: 'practice' }
-          ]
-        },
-        {
-          weekNumber: 3,
-          topic: 'SQL Queries & Database Management',
-          skills: ['Joins', 'Indexes', 'Subqueries'],
-          estimatedHours: 8,
-          completed: false,
-          resources: [
-            { title: 'SQL Zoo Interactive Tutorial', url: 'https://sqlzoo.net', type: 'practice' }
-          ]
-        },
-        {
-          weekNumber: 4,
-          topic: 'Mock Interview & Resume Prep',
-          skills: ['Resume Building', 'Behavioral Questions'],
-          estimatedHours: 8,
-          completed: false,
-          resources: [
-            { title: 'Resume Templates for Placements', url: 'https://novoresume.com', type: 'reading' }
-          ]
-        }
-      ]
-    });
-    await diyaRoadmap.save();
-    console.log('🗺️ Seeded roadmaps for key candidates.');
+    // Seed roadmaps
+    for (const student of seededStudents) {
+      const r = new Roadmap({
+        studentId: student._id,
+        placementScore: student.placementScore,
+        scoreReason: 'Based on current skills and CGPA context.',
+        skillGaps: ['System Design', 'Advanced DSA'],
+        immediateActions: ['Practice daily', 'Build projects'],
+        encouragement: 'Keep going, you are doing great!',
+        totalWeeks: 4,
+        weeks: [
+          {
+            weekNumber: 1, topic: 'Data Structures', skills: ['Graphs'], estimatedHours: 10,
+            completed: getRandomInt(0, 1) === 1, completedAt: new Date(), resources: []
+          },
+          {
+            weekNumber: 2, topic: 'Algorithms', skills: ['Dynamic Programming'], estimatedHours: 12,
+            completed: false, resources: []
+          }
+        ]
+      });
+      await r.save();
+    }
+    console.log('🗺️ Seeded roadmaps for all students.');
 
     // Seed mock drives hosted by the TPO
     const drivesData = [
@@ -291,6 +173,51 @@ router.post('/', async (req, res) => {
         status: 'ongoing',
         postedBy: tpo._id,
         college: 'VIT Vellore'
+      },
+      {
+        companyName: 'Amazon',
+        jobRole: 'SDE 1',
+        packageLPA: 24,
+        driveDate: new Date(Date.now() + 30 * 86400000),
+        registrationDeadline: new Date(Date.now() + 15 * 86400000),
+        requiredSkills: ['DSA', 'Java', 'AWS', 'System Design'],
+        cgpaCutoff: 8.0,
+        branchesAllowed: ['CSE', 'IT', 'ECE'],
+        seatsAvailable: 15,
+        driveType: 'oncampus',
+        status: 'upcoming',
+        postedBy: tpo._id,
+        college: 'VIT Vellore'
+      },
+      {
+        companyName: 'Infosys',
+        jobRole: 'Systems Engineer',
+        packageLPA: 4.5,
+        driveDate: new Date(Date.now() + 10 * 86400000),
+        registrationDeadline: new Date(Date.now() + 2 * 86400000),
+        requiredSkills: ['Python', 'SQL', 'Aptitude'],
+        cgpaCutoff: 6.5,
+        branchesAllowed: [], // Any branch
+        seatsAvailable: 200,
+        driveType: 'oncampus',
+        status: 'upcoming',
+        postedBy: tpo._id,
+        college: 'VIT Vellore'
+      },
+      {
+        companyName: 'Zomato',
+        jobRole: 'Backend Developer',
+        packageLPA: 15,
+        driveDate: new Date(Date.now() + 5 * 86400000),
+        registrationDeadline: new Date(Date.now() + 1 * 86400000),
+        requiredSkills: ['Node.js', 'Python', 'AWS', 'System Design'],
+        cgpaCutoff: 7.5,
+        branchesAllowed: ['CSE', 'IT'],
+        seatsAvailable: 8,
+        driveType: 'offcampus',
+        status: 'upcoming',
+        postedBy: tpo._id,
+        college: 'VIT Vellore'
       }
     ];
 
@@ -300,101 +227,44 @@ router.post('/', async (req, res) => {
       await d.save();
       seededDrives.push(d);
     }
-    console.log('🏢 Seeded placement drives.');
+    console.log(`🏢 Seeded ${seededDrives.length} placement drives.`);
 
-    // Seed check-in progress
-    const progress1 = new Progress({
-      studentId: seededStudents[0]._id,
-      weekNumber: 1,
-      skillsLearned: ['Graphs', 'Dynamic Programming'],
-      hoursSpent: 16,
-      selfRating: 4,
-      blockers: 'Had some trouble optimizing Dynamic Programming subproblems for knapsack variations.',
-      agentFeedback: 'Awesome job, Aarav! For DP optimization, focus on the bottom-up iteration pattern to visualize space complexity. Keep practicing graph traversals!',
-      date: new Date(Date.now() - 10 * 86400000)
-    });
-    await progress1.save();
+    // Assign a random number of applications to drives
+    for (const d of seededDrives) {
+      const numApplicants = getRandomInt(5, 20);
+      const shuffledStudents = [...seededStudents].sort(() => 0.5 - Math.random()).slice(0, numApplicants);
+      
+      for (const s of shuffledStudents) {
+        // Only apply if eligible for basic branch/cgpa cuts
+        if (d.branchesAllowed.length > 0 && !d.branchesAllowed.includes(s.branch)) continue;
+        if (s.cgpa < d.cgpaCutoff) continue;
 
-    const progress2 = new Progress({
-      studentId: seededStudents[1]._id,
-      weekNumber: 1,
-      skillsLearned: ['Core Java', 'OOPs Concepts'],
-      hoursSpent: 10,
-      selfRating: 4,
-      blockers: 'Understanding interface abstraction was slightly challenging.',
-      agentFeedback: 'Great start, Diya! Think of interfaces as a contract that defines what a class can do, not how it does it. You are on track for MNC requirements.',
-      date: new Date(Date.now() - 5 * 86400000)
-    });
-    await progress2.save();
-    console.log('📈 Seeded check-in histories.');
+        const matchPercent = getRandomInt(40, 100);
+        const status = getRandomInt(0, 4) === 0 ? 'shortlisted' : 'applied'; // Randomly shortlist 20%
 
-    // Seed Applications
-    const app1 = new Application({
-      studentId: seededStudents[0]._id,
-      driveId: seededDrives[0]._id,
-      status: 'applied',
-      matchPercentage: 80,
-      studentSnapshot: {
-        skills: seededStudents[0].skills,
-        cgpa: seededStudents[0].cgpa,
-        branch: seededStudents[0].branch,
-        semester: seededStudents[0].semester
+        const app = new Application({
+          studentId: s._id,
+          driveId: d._id,
+          status,
+          matchPercentage: matchPercent,
+          studentSnapshot: {
+            skills: s.skills,
+            cgpa: s.cgpa,
+            branch: s.branch,
+            semester: s.semester
+          }
+        });
+        await app.save();
+        d.applicants.push(s._id);
+        if (status === 'shortlisted') {
+          d.shortlisted.push(s._id);
+        }
       }
-    });
-    await app1.save();
-    seededDrives[0].applicants.push(seededStudents[0]._id);
-
-    const app2 = new Application({
-      studentId: seededStudents[0]._id,
-      driveId: seededDrives[2]._id,
-      status: 'shortlisted',
-      matchPercentage: 100,
-      studentSnapshot: {
-        skills: seededStudents[0].skills,
-        cgpa: seededStudents[0].cgpa,
-        branch: seededStudents[0].branch,
-        semester: seededStudents[0].semester
-      }
-    });
-    await app2.save();
-    seededDrives[2].applicants.push(seededStudents[0]._id);
-    seededDrives[2].shortlisted.push(seededStudents[0]._id);
-
-    const app3 = new Application({
-      studentId: seededStudents[1]._id,
-      driveId: seededDrives[1]._id,
-      status: 'applied',
-      matchPercentage: 100,
-      studentSnapshot: {
-        skills: seededStudents[1].skills,
-        cgpa: seededStudents[1].cgpa,
-        branch: seededStudents[1].branch,
-        semester: seededStudents[1].semester
-      }
-    });
-    await app3.save();
-    seededDrives[1].applicants.push(seededStudents[1]._id);
-
-    const app4 = new Application({
-      studentId: seededStudents[2]._id,
-      driveId: seededDrives[1]._id,
-      status: 'applied',
-      matchPercentage: 75,
-      studentSnapshot: {
-        skills: seededStudents[2].skills,
-        cgpa: seededStudents[2].cgpa,
-        branch: seededStudents[2].branch,
-        semester: seededStudents[2].semester
-      }
-    });
-    await app4.save();
-    seededDrives[1].applicants.push(seededStudents[2]._id);
-
-    // Save drives with applicants array
-    await Promise.all(seededDrives.map(d => d.save()));
+      await d.save();
+    }
     console.log('📝 Seeded drive applications.');
 
-    // Seed some notifications/alerts
+    // Seed some notifications/alerts for Aarav
     await Notification.create([
       {
         userId: seededStudents[0]._id,
@@ -402,25 +272,9 @@ router.post('/', async (req, res) => {
         title: '🎯 Company Match!',
         message: "You're 80% ready for Google! Keep pushing.",
         type: 'alert'
-      },
-      {
-        userId: seededStudents[0]._id,
-        userType: 'student',
-        title: '⭐ Shortlisted!',
-        message: `Congratulations! You've been shortlisted for Razorpay (Associate Frontend Engineer)!`,
-        type: 'shortlist',
-        driveId: seededDrives[2]._id
-      },
-      {
-        userId: seededStudents[1]._id,
-        userType: 'student',
-        title: '🏢 New Campus Drive!',
-        message: `TCS is visiting on ${new Date(seededDrives[1].driveDate).toLocaleDateString('en-IN')} for Ninja & Digital Developer (7 LPA). You're 100% match! Register by ${new Date(seededDrives[1].registrationDeadline).toLocaleDateString('en-IN')}.`,
-        type: 'drive',
-        driveId: seededDrives[1]._id
       }
     ]);
-    console.log('🔔 Seeded mock notifications.');
+
     console.log('✅ Database seeding complete!');
 
     res.json({
