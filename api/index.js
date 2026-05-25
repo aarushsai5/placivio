@@ -13,3 +13,7 @@ module.exports = async function handler(req, res) {
     res.status(500).json({ error: 'Server error', details: e.message, stack: e.stack });
   }
 };
+
+module.exports.config = {
+  maxDuration: 60
+};
