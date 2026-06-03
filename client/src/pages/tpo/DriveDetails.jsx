@@ -39,7 +39,15 @@ export default function DriveDetails() {
   };
 
   if (loading) return <LoadingSpinner message="Loading drive details..." />;
-  if (!data) return null;
+  if (!data) return (
+    <div className="min-h-screen pt-24 pb-12 flex items-center justify-center bg-mesh">
+      <div className="glass-card p-8 text-center max-w-sm w-full mx-4">
+        <h2 className="text-xl font-bold text-slate-800 mb-2">Failed to load data</h2>
+        <p className="text-slate-500 mb-6">There was an issue fetching the drive details.</p>
+        <button onClick={() => window.location.reload()} className="btn-primary w-full">Refresh Page</button>
+      </div>
+    </div>
+  );
 
   const { drive, applicants } = data;
   const avgMatch = applicants.length > 0 ? Math.round(applicants.reduce((s, a) => s + (a.matchPercentage || 0), 0) / applicants.length) : 0;
@@ -89,7 +97,7 @@ export default function DriveDetails() {
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Required Skills</p>
               <div className="flex flex-wrap gap-1.5">{(drive.requiredSkills || []).map(s => <span key={s} className="skill-tag skill-tag-green">{s}</span>)}</div>
             </div>
-            {drive.description && <div className="sm:col-span-3 glass-card p-5"><p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description</p><p className="text-sm text-slate-750 leading-relaxed">{drive.description}</p></div>}
+            {drive.description && <div className="sm:col-span-3 glass-card p-5"><p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description</p><p className="text-sm text-slate-700 leading-relaxed">{drive.description}</p></div>}
           </div>
         )}
 
@@ -120,16 +128,16 @@ export default function DriveDetails() {
 
             {/* Applicant List */}
             {applicants.map(a => {
-              const mc = a.matchPercentage >= 70 ? 'text-emerald-650 font-black' : a.matchPercentage >= 50 ? 'text-amber-600 font-black' : 'text-rose-600 font-black';
+              const mc = a.matchPercentage >= 70 ? 'text-emerald-600 font-black' : a.matchPercentage >= 50 ? 'text-amber-600 font-black' : 'text-rose-600 font-black';
               const statusColors = { 
                 applied: 'bg-blue-50 text-blue-700 border border-blue-100', 
                 shortlisted: 'bg-emerald-50 text-emerald-700 border border-emerald-100', 
-                selected: 'bg-amber-50 text-amber-705 border border-amber-100', 
+                selected: 'bg-amber-50 text-amber-700 border border-amber-100', 
                 rejected: 'bg-slate-100 text-slate-600 border border-slate-200' 
               };
               return (
                 <div key={a._id} className="glass-card p-4 flex flex-wrap items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-sm font-bold text-emerald-750">{a.studentName?.[0]}</div>
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-sm font-bold text-emerald-700">{a.studentName?.[0]}</div>
                   <div className="flex-1 min-w-0">
                     <Link to={`/tpo/students/${a.studentId}`} className="text-sm font-bold text-slate-800 hover:text-emerald-600 transition-colors">{a.studentName}</Link>
                     <p className="text-xs text-slate-500">{a.branch} · Sem {a.semester} · CGPA {a.cgpa}</p>

@@ -1,7 +1,12 @@
 const mongoose = require('mongoose');
 
 const progressSchema = new mongoose.Schema({
-  studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
+  studentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Student',
+    required: true,
+    index: true
+  },
   weekNumber: { type: Number, required: true },
   skillsLearned: [{ type: String, trim: true }],
   hoursSpent: { type: Number, default: 0 },

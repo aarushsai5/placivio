@@ -9,9 +9,9 @@ function calculateMatch(studentSkills, requiredSkills) {
   if (!requiredSkills || requiredSkills.length === 0) return 100;
   const norm = studentSkills.map(s => s.toLowerCase().trim());
   const matched = requiredSkills.filter(cs =>
-    norm.some(ss => ss === cs.toLowerCase().trim() || ss.includes(cs.toLowerCase().trim()) || cs.toLowerCase().trim().includes(ss))
+    norm.some(ss => ss === cs.toLowerCase().trim())
   );
-  return Math.round((matched.length / requiredSkills.length) * 10) * 10;
+  return Math.round((matched.length / requiredSkills.length) * 100);
 }
 
 function getMostImpactfulSkill(studentSkills, companies) {
@@ -19,7 +19,7 @@ function getMostImpactfulSkill(studentSkills, companies) {
   const freq = {};
   for (const c of companies) {
     const missing = (c.requiredSkills || []).filter(cs =>
-      !norm.some(ss => ss === cs.toLowerCase().trim() || ss.includes(cs.toLowerCase().trim()) || cs.toLowerCase().trim().includes(ss))
+      !norm.some(ss => ss === cs.toLowerCase().trim())
     );
     for (const s of missing) freq[s] = (freq[s] || 0) + 1;
   }
@@ -41,14 +41,16 @@ async function generateSmartAlerts(studentId) {
     const newAlerts = [];
     const collegeDrives = drives.filter(d => d.college?.toLowerCase() === student.college?.toLowerCase());
 
+    const recentNotifs = await Notification.find({
+      userId: studentId,
+      createdAt: { $gte: new Date(Date.now() - 7 * 86400000) }
+    });
+
     // Company match crosses 75%
     for (const company of companies) {
       const match = calculateMatch(student.skills, company.requiredSkills);
       if (match >= 80) {
-        const exists = await Notification.findOne({
-          userId: studentId, message: { $regex: `ready for ${company.name}` },
-          createdAt: { $gte: new Date(Date.now() - 7 * 86400000) },
-        });
+        const exists = recentNotifs.some(n => n.message && n.message.includes(`ready for ${company.name}`));
         if (!exists) {
           newAlerts.push({
             userId: studentId, userType: 'student', title: '🎯 Company Match!',
@@ -59,15 +61,13 @@ async function generateSmartAlerts(studentId) {
     }
 
     // Drive deadline approaching
+    const twoDaysAgo = Date.now() - 2 * 86400000;
     for (const drive of collegeDrives) {
       const daysToDeadline = Math.ceil((new Date(drive.registrationDeadline) - new Date()) / 86400000);
       if (daysToDeadline > 0 && daysToDeadline <= 3) {
         const match = calculateMatch(student.skills, drive.requiredSkills);
         if (match >= 50) {
-          const exists = await Notification.findOne({
-            userId: studentId, driveId: drive._id, type: 'reminder',
-            createdAt: { $gte: new Date(Date.now() - 2 * 86400000) },
-          });
+          const exists = recentNotifs.some(n => n.driveId && n.driveId.toString() === drive._id.toString() && n.type === 'reminder' && new Date(n.createdAt).getTime() >= twoDaysAgo);
           if (!exists) {
             newAlerts.push({
               userId: studentId, userType: 'student', title: '📅 Deadline Approaching!',
@@ -83,10 +83,8 @@ async function generateSmartAlerts(studentId) {
     if (progress.length > 0) {
       const daysSince = Math.floor((Date.now() - new Date(progress[0].date).getTime()) / 86400000);
       if (daysSince >= 5) {
-        const exists = await Notification.findOne({
-          userId: studentId, type: 'reminder', message: { $regex: 'falling behind' },
-          createdAt: { $gte: new Date(Date.now() - 3 * 86400000) },
-        });
+        const threeDaysAgo = Date.now() - 3 * 86400000;
+        const exists = recentNotifs.some(n => n.type === 'reminder' && n.message && n.message.includes('falling behind') && new Date(n.createdAt).getTime() >= threeDaysAgo);
         if (!exists) {
           newAlerts.push({
             userId: studentId, userType: 'student', title: '⚠️ Stay on Track!',

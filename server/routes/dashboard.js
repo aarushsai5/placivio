@@ -15,7 +15,7 @@ router.get('/:studentId', async (req, res) => {
   try {
     const { studentId } = req.params;
 
-    await generateSmartAlerts(studentId);
+    generateSmartAlerts(studentId).catch(e => console.error('Smart alerts error:', e.message));
 
     const [student, roadmap, progress, notifications, companies, achievements] = await Promise.all([
       Student.findById(studentId).select('-password'),

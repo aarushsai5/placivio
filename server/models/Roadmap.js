@@ -17,7 +17,12 @@ const weekSchema = new mongoose.Schema({
 }, { _id: false });
 
 const roadmapSchema = new mongoose.Schema({
-  studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
+  studentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Student',
+    required: true,
+    index: true
+  },
   weeks: [weekSchema],
   totalWeeks: Number,
   placementScore: Number,

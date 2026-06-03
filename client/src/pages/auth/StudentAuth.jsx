@@ -44,8 +44,8 @@ export default function StudentAuth() {
             </div>
             <span className="text-2xl font-black gradient-text">Placivio</span>
           </Link>
-          <h1 className="text-3xl font-bold text-white mb-2">{isLogin ? 'Welcome Back' : 'Join Placivio'}</h1>
-          <p className="text-slate-400">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">{isLogin ? 'Welcome Back' : 'Join Placivio'}</h1>
+          <p className="text-slate-600">
             {isLogin ? 'Sign in to continue your placement journey' : 'Create your account and get started'}
           </p>
         </div>
@@ -54,7 +54,7 @@ export default function StudentAuth() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Full Name</label>
+                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 block">Full Name</label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
@@ -63,7 +63,7 @@ export default function StudentAuth() {
               </div>
             )}
             <div>
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Email</label>
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 block">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
@@ -71,7 +71,7 @@ export default function StudentAuth() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Password</label>
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 block">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input type={showPw ? 'text' : 'password'} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
@@ -88,15 +88,15 @@ export default function StudentAuth() {
           </form>
 
           <div className="mt-6 text-center">
-            <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-slate-400 hover:text-indigo-400 transition-colors">
+            <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-slate-600 hover:text-indigo-600 transition-colors">
               {isLogin ? "Don't have an account? " : 'Already have an account? '}
-              <span className="font-semibold text-indigo-400">{isLogin ? 'Sign Up' : 'Sign In'}</span>
+              <span className="font-semibold text-indigo-600">{isLogin ? 'Sign Up' : 'Sign In'}</span>
             </button>
           </div>
         </div>
 
         <p className="text-center mt-6 text-xs text-slate-600">
-          <Link to="/auth/tpo" className="text-indigo-400/60 hover:text-indigo-400 transition-colors">I'm a TPO →</Link>
+          <Link to="/auth/tpo" className="text-indigo-600/60 hover:text-indigo-600 transition-colors">I'm a TPO →</Link>
         </p>
       </div>
     </div>

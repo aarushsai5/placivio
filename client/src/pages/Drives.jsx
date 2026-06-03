@@ -65,18 +65,18 @@ export default function Drives() {
   });
 
   const getMatchColor = (pct) => {
-    if (pct >= 70) return { text: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', bar: 'from-emerald-500 to-emerald-405' };
-    if (pct >= 50) return { text: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', bar: 'from-amber-500 to-yellow-405' };
-    return { text: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-200', bar: 'from-rose-500 to-red-405' };
+    if (pct >= 70) return { text: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', bar: 'from-emerald-500 to-emerald-400' };
+    if (pct >= 50) return { text: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', bar: 'from-amber-500 to-yellow-400' };
+    return { text: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-200', bar: 'from-rose-500 to-red-400' };
   };
 
   const getStatusBadge = (d) => {
     const now = new Date();
     const deadline = new Date(d.registrationDeadline);
-    if (d.status === 'completed') return { text: 'Closed', class: 'bg-slate-100 text-slate-600 border-slate-205' };
+    if (d.status === 'completed') return { text: 'Closed', class: 'bg-slate-100 text-slate-600 border-slate-200' };
     const daysLeft = Math.ceil((deadline - now) / 86400000);
-    if (daysLeft <= 3 && daysLeft > 0) return { text: `Closing in ${daysLeft}d`, class: 'bg-amber-50 text-amber-705 border-amber-200 animate-pulse' };
-    if (daysLeft <= 0) return { text: 'Closed', class: 'bg-slate-100 text-slate-600 border-slate-205' };
+    if (daysLeft <= 3 && daysLeft > 0) return { text: `Closing in ${daysLeft}d`, class: 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse' };
+    if (daysLeft <= 0) return { text: 'Closed', class: 'bg-slate-100 text-slate-600 border-slate-200' };
     return { text: 'Open', class: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
   };
 
@@ -89,7 +89,7 @@ export default function Drives() {
           </div>
           <div>
             <h1 className="text-3xl font-black text-slate-800">Campus Drives</h1>
-            <p className="text-sm text-slate-550">{user.college} · {filtered.length} drives</p>
+            <p className="text-sm text-slate-500">{user.college} · {filtered.length} drives</p>
           </div>
         </div>
 
@@ -101,7 +101,7 @@ export default function Drives() {
           </div>
           <div className="flex gap-2">
             {[['all', '✨ All'], ['open', '🟢 Open'], ['applied', '📋 Applied']].map(([val, label]) => (
-              <button key={val} onClick={() => setFilter(val)} className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${filter === val ? 'bg-indigo-50 border border-indigo-200 text-indigo-700 shadow-sm' : 'border border-slate-200 text-slate-655 hover:border-indigo-500/20 hover:text-indigo-605'}`}>
+              <button key={val} onClick={() => setFilter(val)} className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${filter === val ? 'bg-indigo-50 border border-indigo-200 text-indigo-700 shadow-sm' : 'border border-slate-200 text-slate-600 hover:border-indigo-500/20 hover:text-indigo-600'}`}>
                 {label}
               </button>
             ))}
@@ -116,7 +116,7 @@ export default function Drives() {
             const isApplied = appliedIds.has(drive._id);
             const isExpanded = expandedId === drive._id;
             const cgpaOk = (user.cgpa || 0) >= drive.cgpaCutoff;
-            const branchOk = drive.branchesAllowed.length === 0 || drive.branchesAllowed.includes(user.branch);
+            const branchOk = !drive.branchesAllowed || drive.branchesAllowed.length === 0 || drive.branchesAllowed.includes(user.branch);
             const eligible = cgpaOk && branchOk && status.text !== 'Closed';
             const daysToDate = Math.ceil((new Date(drive.driveDate) - new Date()) / 86400000);
 
@@ -130,7 +130,7 @@ export default function Drives() {
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <h3 className="text-lg font-bold text-slate-800">{drive.companyName}</h3>
                       <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${status.class}`}>{status.text}</span>
-                      {isApplied && <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-705 border border-emerald-200 font-medium">Applied ✓</span>}
+                      {isApplied && <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">Applied ✓</span>}
                     </div>
                     <p className="text-sm text-slate-600">{drive.jobRole} · {drive.packageLPA} LPA · {daysToDate > 0 ? `in ${daysToDate} days` : 'date passed'}</p>
                   </div>
@@ -151,7 +151,7 @@ export default function Drives() {
                       </div>
                       <div className="space-y-2">
                         <div className="text-slate-600">CGPA: {drive.cgpaCutoff}+ {cgpaOk ? <span className="text-emerald-600 font-bold">✓</span> : <span className="text-rose-600 font-bold">✗ ({user.cgpa})</span>}</div>
-                        <div className="text-slate-600">Branches: {drive.branchesAllowed.join(', ') || 'All'} {branchOk ? <span className="text-emerald-600 font-bold">✓</span> : <span className="text-rose-600 font-bold">✗</span>}</div>
+                        <div className="text-slate-600">Branches: {drive.branchesAllowed?.join(', ') || 'All'} {branchOk ? <span className="text-emerald-600 font-bold">✓</span> : <span className="text-rose-600 font-bold">✗</span>}</div>
                         <div className="text-slate-600">Seats: {drive.seatsAvailable || 'N/A'} · {drive.driveType}</div>
                       </div>
                     </div>

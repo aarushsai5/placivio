@@ -21,13 +21,14 @@ router.get('/dashboard', authenticateToken, requireTpo, async (req, res) => {
     const college = tpo.college;
     const collegeRegex = new RegExp('^' + college.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i');
 
-    const [students, drives, apps] = await Promise.all([
+    const drives = await Drive.find({ college: collegeRegex }).sort({ createdAt: -1 });
+    const driveIds = drives.map(d => d._id);
+
+    const [students, collegeApps] = await Promise.all([
       Student.find({ college: collegeRegex, profileCompleted: true }).select('-password'),
-      Drive.find({ college: collegeRegex }).sort({ createdAt: -1 }),
-      Application.find({}).populate('driveId', 'college'),
+      Application.find({ driveId: { $in: driveIds } }).populate('driveId', 'college'),
     ]);
 
-    const collegeApps = apps.filter(a => a.driveId && collegeRegex.test(a.driveId.college));
     const selectedCount = collegeApps.filter(a => a.status === 'selected').length;
     const activeDrives = drives.filter(d => d.status === 'upcoming' || d.status === 'ongoing');
 
@@ -134,40 +135,65 @@ router.post('/run-recommendations', authenticateToken, requireTpo, async (req, r
       Drive.find({ college: collegeRegex, status: { $in: ['upcoming', 'ongoing'] } }),
     ]);
 
+    const studentIds = students.map(s => s._id);
+    const driveIds = drives.map(d => d._id);
+    
+    const [allApps, allNotifs] = await Promise.all([
+      Application.find({ studentId: { $in: studentIds }, driveId: { $in: driveIds } }),
+      Notification.find({ userId: { $in: studentIds }, driveId: { $in: driveIds }, type: { $in: ['drive', 'reminder'] } })
+    ]);
+
+    const appSet = new Set(allApps.map(a => `${a.studentId}_${a.driveId}`));
+    const now = Date.now();
+    const driveNotifMap = new Map();
+    const reminderNotifMap = new Map();
+    
+    for (const n of allNotifs) {
+      const key = `${n.userId}_${n.driveId}`;
+      const age = now - new Date(n.createdAt).getTime();
+      if (n.type === 'drive' && age < 3 * 86400000) driveNotifMap.set(key, true);
+      if (n.type === 'reminder' && age < 2 * 86400000) reminderNotifMap.set(key, true);
+    }
+
     let notifCount = 0;
+    const newNotifications = [];
+
     for (const student of students) {
       for (const drive of drives) {
         const match = calculateMatch(student.skills, drive.requiredSkills);
         const daysToDeadline = Math.ceil((new Date(drive.registrationDeadline) - new Date()) / 86400000);
 
-        // Already applied?
-        const applied = await Application.findOne({ studentId: student._id, driveId: drive._id });
-        if (applied) continue;
+        const key = `${student._id}_${drive._id}`;
+        if (appSet.has(key)) continue;
 
         if (match >= 75) {
-          const exists = await Notification.findOne({ userId: student._id, driveId: drive._id, type: 'drive', createdAt: { $gte: new Date(Date.now() - 3 * 86400000) } });
-          if (!exists) {
-            await Notification.create({
+          if (!driveNotifMap.has(key)) {
+            newNotifications.push({
               userId: student._id, userType: 'student',
               title: '🎯 Great Match!',
               message: `You're ${match}% match for ${drive.companyName} (${drive.jobRole}). Apply before ${new Date(drive.registrationDeadline).toLocaleDateString('en-IN')}!`,
               type: 'drive', driveId: drive._id,
             });
+            driveNotifMap.set(key, true);
             notifCount++;
           }
         } else if (match >= 60 && daysToDeadline > 0 && daysToDeadline <= 5) {
-          const exists = await Notification.findOne({ userId: student._id, driveId: drive._id, type: 'reminder', createdAt: { $gte: new Date(Date.now() - 2 * 86400000) } });
-          if (!exists) {
-            await Notification.create({
+          if (!reminderNotifMap.has(key)) {
+            newNotifications.push({
               userId: student._id, userType: 'student',
               title: '⏰ Deadline Approaching!',
               message: `${drive.companyName} deadline in ${daysToDeadline} days. You're ${match}% match — apply now!`,
               type: 'reminder', driveId: drive._id,
             });
+            reminderNotifMap.set(key, true);
             notifCount++;
           }
         }
       }
+    }
+
+    if (newNotifications.length > 0) {
+      await Notification.insertMany(newNotifications);
     }
 
     console.log(`🔔 Drive recommendations: sent ${notifCount} notifications`);

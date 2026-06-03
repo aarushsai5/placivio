@@ -94,7 +94,6 @@ export default function Checkin() {
   };
 
   if (loading) return <LoadingSpinner message="Loading your roadmap..." />;
-  if (submitting) return <LoadingSpinner message="AI is generating personalized feedback..." />;
 
   // Feedback view
   if (feedbackData) {
@@ -110,7 +109,7 @@ export default function Checkin() {
               <p className="text-slate-600">Here's what Placivio thinks about your progress</p>
             </div>
 
-            {feedbackData.updatedScore && (
+            {feedbackData.updatedScore != null && (
               <div className="text-center mb-6 p-4 rounded-xl bg-slate-100 border border-slate-200/60">
                 <p className="text-sm text-slate-500 mb-1">Updated Placement Score</p>
                 <p className="text-4xl font-bold gradient-text">{feedbackData.updatedScore}</p>
@@ -173,7 +172,13 @@ export default function Checkin() {
           <p className="text-slate-600">Tell us how your week went — our AI will give you personalized feedback.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="glass-card p-8 space-y-6 animate-fade-in">
+        <div className="relative">
+          {submitting && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-2xl">
+              <LoadingSpinner message="AI is generating personalized feedback..." />
+            </div>
+          )}
+          <form onSubmit={handleSubmit} className="glass-card p-8 space-y-6 animate-fade-in">
           {/* Week selector */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">Which week did you complete?</label>
@@ -291,7 +296,8 @@ export default function Checkin() {
             <Send className="w-5 h-5" />
             Submit & Get AI Feedback
           </button>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

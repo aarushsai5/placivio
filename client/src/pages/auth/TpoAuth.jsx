@@ -44,8 +44,8 @@ export default function TpoAuth() {
             </div>
             <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">Placivio TPO</span>
           </Link>
-          <h1 className="text-3xl font-bold text-white mb-2">{isLogin ? 'TPO Login' : 'Register as TPO'}</h1>
-          <p className="text-slate-400">{isLogin ? 'Manage your campus placements' : 'Set up your placement office'}</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">{isLogin ? 'TPO Login' : 'Register as TPO'}</h1>
+          <p className="text-slate-600">{isLogin ? 'Manage your campus placements' : 'Set up your placement office'}</p>
         </div>
 
         <div className="glass-card-vibrant p-8" style={{ borderColor: 'rgba(52, 211, 153, 0.12)' }}>
@@ -53,7 +53,7 @@ export default function TpoAuth() {
             {!isLogin && (
               <>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Full Name</label>
+                  <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 block">Full Name</label>
                   <div className="relative">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
@@ -61,7 +61,7 @@ export default function TpoAuth() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">College</label>
+                  <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 block">College</label>
                   <div className="relative">
                     <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input type="text" value={form.college} onChange={e => setForm({ ...form, college: e.target.value })}
@@ -69,7 +69,7 @@ export default function TpoAuth() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Designation</label>
+                  <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 block">Designation</label>
                   <div className="relative">
                     <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input type="text" value={form.designation} onChange={e => setForm({ ...form, designation: e.target.value })}
@@ -79,7 +79,7 @@ export default function TpoAuth() {
               </>
             )}
             <div>
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Email</label>
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 block">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
@@ -87,7 +87,7 @@ export default function TpoAuth() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Password</label>
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 block">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input type={showPw ? 'text' : 'password'} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
@@ -104,7 +104,7 @@ export default function TpoAuth() {
           </form>
 
           <div className="mt-6 text-center">
-            <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-slate-400 hover:text-emerald-400 transition-colors">
+            <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-slate-600 hover:text-emerald-400 transition-colors">
               {isLogin ? "Don't have an account? " : 'Already have an account? '}
               <span className="font-semibold text-emerald-400">{isLogin ? 'Register' : 'Sign In'}</span>
             </button>

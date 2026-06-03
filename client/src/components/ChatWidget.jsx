@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Send, X, Sparkles, Bot, User } from 'lucide-react';
 import { sendChatMessage } from '../services/api';
 
@@ -9,6 +9,15 @@ export default function ChatWidget({ studentId }) {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -56,7 +65,7 @@ export default function ChatWidget({ studentId }) {
           <div>
             <p className="text-sm font-bold text-slate-800">Placivio Coach</p>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-450 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-xs text-emerald-600">Online</span>
             </div>
           </div>
@@ -106,6 +115,7 @@ export default function ChatWidget({ studentId }) {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}

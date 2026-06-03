@@ -20,11 +20,19 @@ export default function StudentProfile() {
   };
 
   if (loading) return <LoadingSpinner message="Loading student..." />;
-  if (!data) return null;
+  if (!data) return (
+    <div className="min-h-screen pt-24 pb-12 flex items-center justify-center bg-mesh">
+      <div className="glass-card p-8 text-center max-w-sm w-full mx-4">
+        <h2 className="text-xl font-bold text-slate-800 mb-2">Failed to load data</h2>
+        <p className="text-slate-500 mb-6">There was an issue fetching the student profile.</p>
+        <button onClick={() => window.location.reload()} className="btn-primary w-full">Refresh Page</button>
+      </div>
+    </div>
+  );
 
   const { student, roadmap, progress, applications, achievements } = data;
-  const completedWeeks = roadmap ? roadmap.weeks.filter(w => w.completed).length : 0;
-  const totalHours = progress.reduce((s, p) => s + (p.hoursSpent || 0), 0);
+  const completedWeeks = roadmap ? (roadmap.weeks || []).filter(w => w.completed).length : 0;
+  const totalHours = (progress || []).reduce((s, p) => s + (p.hoursSpent || 0), 0);
 
   return (
     <div className="min-h-screen pt-24 pb-12 px-4 bg-mesh">

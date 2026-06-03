@@ -18,9 +18,9 @@ export function ToastProvider({ children }) {
 
   const icons = { success: CheckCircle, error: AlertTriangle, info: Info };
   const colors = {
-    success: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
-    error: 'border-rose-500/30 bg-rose-500/10 text-rose-300',
-    info: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300',
+    success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+    error: 'border-rose-200 bg-rose-50 text-rose-800',
+    info: 'border-indigo-200 bg-indigo-50 text-indigo-800',
   };
 
   return (
@@ -33,7 +33,7 @@ export function ToastProvider({ children }) {
             <div key={t.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-xl animate-slide-up ${colors[t.type] || colors.info}`}>
               <Icon className="w-5 h-5 flex-shrink-0" />
               <p className="text-sm font-medium flex-1">{t.message}</p>
-              <button onClick={() => removeToast(t.id)} className="text-white/40 hover:text-white/80 transition-colors"><X className="w-4 h-4" /></button>
+              <button onClick={() => removeToast(t.id)} className="text-slate-400 hover:text-slate-600 transition-colors"><X className="w-4 h-4" /></button>
             </div>
           );
         })}

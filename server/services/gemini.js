@@ -2,14 +2,15 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY?.trim();
 
 const MODELS = [
   'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-2.0-flash-lite',
-  'gemini-1.5-flash',
+  'gemini-2.0-flash'
 ];
 
-async function callGemini(prompt, jsonMode = true, maxRetries = 3) {
+async function callGemini(prompt, jsonMode = true, maxRetries = 1) {
   for (const model of MODELS) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 25000); // 25s timeout
+
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
         const body = {
@@ -22,7 +23,10 @@ async function callGemini(prompt, jsonMode = true, maxRetries = 3) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
+          signal: controller.signal
         });
+        
+        clearTimeout(timeout);
 
         if (response.status === 429) {
           const errorData = await response.json().catch(() => ({}));
@@ -43,12 +47,23 @@ async function callGemini(prompt, jsonMode = true, maxRetries = 3) {
         }
 
         const data = await response.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        let text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!text) throw new Error(`[${model}] Empty response`);
+
+        // Strip markdown fences if present
+        if (jsonMode) {
+          text = text.replace(/^```json/mi, '').replace(/```$/m, '').trim();
+        }
 
         console.log(`✅ [${model}] API call successful.`);
         return text;
       } catch (error) {
+        clearTimeout(timeout);
+        if (error.name === 'AbortError') {
+          console.log(`⚠️ [${model}] Request timed out after 25s.`);
+          if (attempt < maxRetries) continue;
+          break; // Try next model on timeout
+        }
         if (error.message?.includes('429') || error.message?.includes('quota')) {
           if (attempt < maxRetries) { await sleep(Math.pow(2, attempt + 1) * 1000); continue; }
           break;
@@ -57,7 +72,7 @@ async function callGemini(prompt, jsonMode = true, maxRetries = 3) {
       }
     }
   }
-  throw new Error('All Gemini models rate-limited. Please wait and try again.');
+  throw new Error('All Gemini models failed or rate-limited. Please wait and try again.');
 }
 
 function parseRetryDelay(errorData) {
@@ -85,8 +100,13 @@ Analyze skills, identify gaps for target companies, create a week-by-week roadma
 JSON format:
 {"placementScore":number,"scoreReason":"string","skillGaps":["array"],"roadmap":[{"week":number,"topic":"string","skills":["array"],"resources":[{"title":"string","url":"string","type":"string"}],"estimatedHours":number}],"immediateActions":["3 strings"],"encouragement":"string"}`;
 
-  const text = await callGemini(prompt, true);
-  return JSON.parse(text);
+  try {
+    const text = await callGemini(prompt, true);
+    return JSON.parse(text);
+  } catch (error) {
+    console.error('Failed to parse roadmap JSON:', error);
+    return { placementScore: 50, scoreReason: "AI couldn't generate a detailed score right now.", skillGaps: [], roadmap: [], immediateActions: ["Keep practicing core skills", "Update your resume"], encouragement: "Keep going! We will have a more detailed roadmap ready soon." };
+  }
 }
 
 // ── Feedback ──
@@ -119,8 +139,8 @@ async function chatWithAgent(student, roadmap, progressHistory, message, drives 
   if (drives.length > 0) {
     driveContext = '\n\nUpcoming Campus Drives at their college:\n' + drives.slice(0, 5).map(d => {
       const daysLeft = Math.ceil((new Date(d.driveDate) - new Date()) / 86400000);
-      const norm = student.skills.map(s => s.toLowerCase().trim());
-      const matched = (d.requiredSkills || []).filter(cs => norm.some(ss => ss.includes(cs.toLowerCase().trim()) || cs.toLowerCase().trim().includes(ss)));
+      const norm = (student.skills || []).map(s => s.toLowerCase().trim());
+      const matched = (d.requiredSkills || []).filter(cs => norm.some(ss => ss === cs.toLowerCase().trim() || ss.includes(cs.toLowerCase().trim()) || cs.toLowerCase().trim().includes(ss)));
       const match = d.requiredSkills.length > 0 ? Math.round((matched.length / d.requiredSkills.length) * 100) : 100;
       return `- ${d.companyName} (${d.jobRole}, ${d.packageLPA} LPA) in ${daysLeft} days | Match: ${match}% | Needs: ${d.requiredSkills.join(', ')}`;
     }).join('\n');
@@ -129,8 +149,8 @@ async function chatWithAgent(student, roadmap, progressHistory, message, drives 
   const prompt = `You are Placivio, a personal AI placement coach. You're chatting with ${student.name}.
 
 Profile: ${student.college} | ${student.branch} | Sem ${student.semester} | CGPA ${student.cgpa}
-Skills: ${student.skills.join(', ')}
-Target Companies: ${student.targetCompanies.join(', ')}
+Skills: ${(student.skills || []).join(', ')}
+Target Companies: ${(student.targetCompanies || []).join(', ')}
 Score: ${student.placementScore}/100 | Progress: ${completedWeeks}/${roadmap?.totalWeeks || 0} weeks | Hours: ${totalHours}
 Skill Gaps: ${roadmap?.skillGaps?.join(', ') || 'Not analyzed'}
 ${driveContext}
@@ -142,7 +162,7 @@ Be helpful, specific, encouraging. Reference their real data. If asking about dr
   try {
     return await callGemini(prompt, false);
   } catch {
-    return "I'm having trouble connecting. Try again in a moment!";
+    return "I'm having trouble connecting to the AI. Try again in a moment!";
   }
 }
 
@@ -168,8 +188,13 @@ ${applicantList}
 Shortlist the top ${Math.min(drive.seatsAvailable || 10, applicants.length)} candidates. Return JSON:
 {"shortlisted":[{"index":number,"name":"string","reason":"string","score":number}],"summary":"string"}`;
 
-  const text = await callGemini(prompt, true);
-  return JSON.parse(text);
+  try {
+    const text = await callGemini(prompt, true);
+    return JSON.parse(text);
+  } catch (error) {
+    console.error('Failed to parse AI shortlist:', error);
+    return { shortlisted: [], summary: "AI failed to generate a shortlist. Please review applications manually." };
+  }
 }
 
 // ── Batch Report for TPO ──
@@ -191,8 +216,13 @@ Active Drives: ${drives.length}
 Analyze and write a 3-paragraph report covering: batch readiness overview, top skills vs gaps, actionable recommendations. Return JSON:
 {"report":"string","keyInsights":["array of 3-5 bullet points"],"riskStudents":number,"recommendedFocus":"string"}`;
 
-  const text = await callGemini(prompt, true);
-  return JSON.parse(text);
+  try {
+    const text = await callGemini(prompt, true);
+    return JSON.parse(text);
+  } catch (error) {
+    console.error('Failed to parse batch report:', error);
+    return { report: "AI failed to generate report.", keyInsights: [], riskStudents: 0, recommendedFocus: "N/A" };
+  }
 }
 
 module.exports = { generateRoadmap, generateFeedback, chatWithAgent, generateAIShortlist, generateBatchReport, callGemini };

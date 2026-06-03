@@ -174,7 +174,7 @@ export default function Setup() {
           {step === 1 && (
             <div className="space-y-5">
               {user?.name && (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-indigo-55 bg-indigo-50 border border-indigo-100">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-indigo-50 bg-indigo-50 border border-indigo-100">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white shadow-sm">{user.name[0]}</div>
                   <div><p className="text-sm font-semibold text-slate-800">{user.name}</p><p className="text-xs text-slate-500">{user.email}</p></div>
                 </div>
@@ -246,7 +246,7 @@ export default function Setup() {
 
               {form.skills.length > 0 && (
                 <div>
-                  <p className="text-xs text-slate-650 mb-2">Added skills:</p>
+                  <p className="text-xs text-slate-600 mb-2">Added skills:</p>
                   <div className="flex flex-wrap gap-2">
                     {form.skills.map(skill => (
                       <SkillTag key={skill} skill={skill} variant="blue" onRemove={removeSkill} />
@@ -295,7 +295,7 @@ export default function Setup() {
                         className={`p-3 rounded-xl border text-sm font-medium transition-all duration-200 ${
                           isSelected
                             ? 'bg-indigo-50 border-indigo-305 text-indigo-700'
-                            : 'border-slate-200 text-slate-550 hover:border-indigo-300'
+                            : 'border-slate-200 text-slate-500 hover:border-indigo-300'
                         }`}
                       >
                         {isSelected && <Check className="w-4 h-4 inline mr-1.5" />}
@@ -328,7 +328,7 @@ export default function Setup() {
                       className={`flex-1 p-3 rounded-xl border text-sm font-medium transition-all duration-200 ${
                         form.timeline === t
                           ? 'bg-indigo-50 border-indigo-305 text-indigo-700'
-                          : 'border-slate-200 text-slate-550 hover:border-indigo-300'
+                          : 'border-slate-200 text-slate-500 hover:border-indigo-300'
                       }`}
                     >
                       {t}

@@ -89,7 +89,7 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-1">
               {navLinks.map(link => (
                 <Link key={link.to} to={link.to}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${link.active ? `bg-gradient-to-r ${accentBg} ${isTpo ? 'text-emerald-700 border-emerald-500/20' : 'text-indigo-600 border-indigo-500/20'} border` : `text-slate-600 hover:${isTpo ? 'text-emerald-700 hover:bg-emerald-50/50' : 'text-indigo-600 hover:bg-indigo-50/50'}`}`}>
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${link.active ? `bg-gradient-to-r ${accentBg} ${isTpo ? 'text-emerald-700 border-emerald-500/20' : 'text-indigo-600 border-indigo-500/20'} border` : `text-slate-600 ${isTpo ? 'hover:text-emerald-700 hover:bg-emerald-50/50' : 'hover:text-indigo-600 hover:bg-indigo-50/50'}`}`}>
                   <link.icon className="w-4 h-4" /> {link.label}
                 </Link>
               ))}
@@ -145,7 +145,7 @@ export default function Navbar() {
               <div className="flex flex-col gap-1 pt-1">
                 {navLinks.map(link => (
                   <Link key={link.to} to={link.to} onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${link.active ? `bg-gradient-to-r ${accentBg} ${isTpo ? 'text-emerald-700' : 'text-indigo-600'}` : `text-slate-600 hover:${isTpo ? 'text-emerald-700 hover:bg-emerald-50/50' : 'text-indigo-600 hover:bg-indigo-50/50'}`}`}>
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${link.active ? `bg-gradient-to-r ${accentBg} ${isTpo ? 'text-emerald-700' : 'text-indigo-600'}` : `text-slate-600 ${isTpo ? 'hover:text-emerald-700 hover:bg-emerald-50/50' : 'hover:text-indigo-600 hover:bg-indigo-50/50'}`}`}>
                     <link.icon className="w-5 h-5" /> {link.label}
                   </Link>
                 ))}

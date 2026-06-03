@@ -76,9 +76,9 @@ export default function Companies() {
   }
 
   const getMatchStyle = (pct) => {
-    if (pct >= 80) return { text: 'text-emerald-600', ring: 'stroke-emerald-500', glow: 'shadow-emerald-500/5', badge: 'bg-emerald-50 border-emerald-200', bar: 'from-emerald-500 to-emerald-405' };
-    if (pct >= 50) return { text: 'text-amber-600', ring: 'stroke-amber-500', glow: 'shadow-amber-500/5', badge: 'bg-amber-50 border-amber-200', bar: 'from-amber-500 to-yellow-405' };
-    return { text: 'text-rose-600', ring: 'stroke-rose-500', glow: 'shadow-rose-500/5', badge: 'bg-rose-50 border-rose-200', bar: 'from-rose-500 to-red-405' };
+    if (pct >= 80) return { text: 'text-emerald-600', ring: 'stroke-emerald-500', glow: 'shadow-emerald-500/5', badge: 'bg-emerald-50 border-emerald-200', bar: 'from-emerald-500 to-emerald-400' };
+    if (pct >= 50) return { text: 'text-amber-600', ring: 'stroke-amber-500', glow: 'shadow-amber-500/5', badge: 'bg-amber-50 border-amber-200', bar: 'from-amber-500 to-yellow-400' };
+    return { text: 'text-rose-600', ring: 'stroke-rose-500', glow: 'shadow-rose-500/5', badge: 'bg-rose-50 border-rose-200', bar: 'from-rose-500 to-red-400' };
   };
 
   const filtered = (data?.companies || []).filter(c => {
@@ -168,7 +168,7 @@ export default function Companies() {
                 className={`px-4 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all duration-300 ${
                   filterType === type
                     ? 'bg-indigo-50 border border-indigo-200 text-indigo-700 shadow-sm'
-                    : 'border border-slate-200 text-slate-655 hover:border-indigo-500/20 hover:text-indigo-600'
+                    : 'border border-slate-200 text-slate-600 hover:border-indigo-500/20 hover:text-indigo-600'
                 }`}
               >
                 {type === 'all' ? '✨ All' : `${TYPE_CONFIG[type]?.emoji || ''} ${type}`}
@@ -288,7 +288,7 @@ export default function Companies() {
 
                     {company.boostSkill && (
                       <div className="mt-5 p-3.5 rounded-xl bg-amber-50 border border-amber-100 flex items-center gap-3">
-                        <Zap className="w-5 h-5 text-amber-550 flex-shrink-0 animate-bounce-soft" />
+                        <Zap className="w-5 h-5 text-amber-500 flex-shrink-0 animate-bounce-soft" />
                         <p className="text-sm text-slate-700">
                           <span className="font-semibold text-amber-700">Boost tip:</span> Learning <span className="font-bold text-slate-800">{company.boostSkill}</span> would increase your match the most.
                         </p>
@@ -299,8 +299,8 @@ export default function Companies() {
                       <span className="flex items-center gap-1.5">
                         <Star className="w-3.5 h-3.5 text-amber-500" /> CGPA: {company.cgpaCutoff}+
                         {company.cgpaEligible
-                          ? <span className="text-emerald-605 font-medium">✓ Eligible</span>
-                          : <span className="text-rose-605 font-medium">✗ Below</span>
+                          ? <span className="text-emerald-600 font-medium">✓ Eligible</span>
+                          : <span className="text-rose-600 font-medium">✗ Below</span>
                         }
                       </span>
                     </div>

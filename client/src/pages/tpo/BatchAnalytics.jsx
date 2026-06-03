@@ -32,7 +32,15 @@ export default function BatchAnalytics() {
   };
 
   if (loading) return <LoadingSpinner message="Loading batch analytics..." />;
-  if (!data) return null;
+  if (!data) return (
+    <div className="min-h-screen pt-24 pb-12 flex items-center justify-center bg-mesh">
+      <div className="glass-card p-8 text-center max-w-sm w-full mx-4">
+        <h2 className="text-xl font-bold text-slate-800 mb-2">Failed to load data</h2>
+        <p className="text-slate-500 mb-6">There was an issue fetching batch analytics.</p>
+        <button onClick={() => window.location.reload()} className="btn-primary w-full">Refresh Page</button>
+      </div>
+    </div>
+  );
 
   const { stats, readiness, leaderboard, atRisk, skillHeatmap } = data;
   const pieData = [
@@ -158,14 +166,14 @@ export default function BatchAnalytics() {
                   <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
                     <h3 className="text-sm font-bold text-indigo-800 mb-2">Key Insights</h3>
                     <ul className="space-y-1.5">
-                      {report.keyInsights.map((ins, i) => <li key={i} className="text-xs text-slate-650">• {ins}</li>)}
+                      {report.keyInsights.map((ins, i) => <li key={i} className="text-xs text-slate-600">• {ins}</li>)}
                     </ul>
                   </div>
                 )}
                 {report.recommendedFocus && (
                   <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
                     <h3 className="text-sm font-bold text-emerald-800 mb-2">Actionable Focus</h3>
-                    <p className="text-sm text-slate-705 font-semibold">{report.recommendedFocus}</p>
+                    <p className="text-sm text-slate-700 font-semibold">{report.recommendedFocus}</p>
                   </div>
                 )}
               </div>
