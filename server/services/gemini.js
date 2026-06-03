@@ -306,7 +306,12 @@ RULES:
 
   try {
     return await callGemini(prompt, false);
-  } catch {
+  } catch (err) {
+    console.error("❌ callGemini in chatWithAgent failed:", err.message || err);
+    const errMsg = err.message || "";
+    if (errMsg.includes("suspended") || errMsg.includes("suspended") || errMsg.includes("API key not valid") || errMsg.includes("403") || errMsg.includes("400")) {
+      return "⚠️ **Connection Error**: The application's Gemini API Key has been suspended or is invalid (this usually happens if the key was exposed or pushed to GitHub). Please ask the administrator to update the `GEMINI_API_KEY` in the Vercel dashboard / local environment.";
+    }
     return "I'm having trouble connecting to the AI. Try again in a moment!";
   }
 }
