@@ -142,9 +142,75 @@ JSON format:
   } catch (error) {
     console.error('Failed to parse roadmap JSON:', error);
     // Realistic fallback to prevent empty roadmaps on timeout/quota issues
+    const template = [
+      { t: 'Arrays & Strings', s: 'Arrays, Strings', u: 'https://leetcode.com/explore/learn/card/array-and-string/' },
+      { t: 'Hash Maps & Sets', s: 'Hashing, Optimization', u: 'https://youtube.com/watch?v=H75Qp7RQCFQ' },
+      { t: 'Linked Lists Fundamentals', s: 'Linked Lists, Pointers', u: 'https://youtube.com/watch?v=qT4qIvtDqYQ' },
+      { t: 'Stacks & Queues', s: 'Stacks, Queues', u: 'https://www.hackerrank.com/domains/data-structures' },
+      { t: 'Binary Trees & Traversals', s: 'Trees, Recursion', u: 'https://leetcode.com/explore/learn/card/data-structure-tree/' },
+      { t: 'Binary Search Trees', s: 'BST, Search', u: 'https://www.youtube.com/watch?v=pYT9F8_LFTM' },
+      { t: 'Heaps & Priority Queues', s: 'Heaps', u: 'https://www.youtube.com/watch?v=t0Cq6tVNRBA' },
+      { t: 'Graph Traversal (BFS/DFS)', s: 'Graphs, BFS, DFS', u: 'https://takeuforward.org/graph/striver-graph-series-top-algorithms/' },
+      { t: 'Shortest Path Algorithms', s: 'Dijkstra, Bellman-Ford', u: 'https://www.youtube.com/watch?v=EFg3u_E6eHU' },
+      { t: 'Dynamic Programming: 1D', s: 'DP, Memoization', u: 'https://leetcode.com/discuss/general-discussion/458695/dynamic-programming-patterns' },
+      { t: 'Dynamic Programming: 2D', s: 'DP, Tabulation', u: 'https://www.youtube.com/watch?v=nqowUJzG-iM' },
+      { t: 'Greedy Algorithms', s: 'Greedy, Optimization', u: 'https://www.hackerearth.com/practice/algorithms/greedy/basics-of-greedy-algorithms/tutorial/' },
+      
+      { t: 'SQL Basics & Selects', s: 'SQL, Queries', u: 'https://sqlzoo.net/' },
+      { t: 'SQL Joins & Aggregations', s: 'SQL, Joins, Group By', u: 'https://mode.com/sql-tutorial/' },
+      { t: 'Advanced SQL & Subqueries', s: 'Window Functions, Subqueries', u: 'https://www.hackerrank.com/domains/sql' },
+      { t: 'Database Normalization', s: 'DBMS, 1NF, 2NF, 3NF', u: 'https://www.youtube.com/watch?v=GFQaEYEc8_8' },
+      { t: 'NoSQL Databases (MongoDB)', s: 'NoSQL, JSON', u: 'https://www.mongodb.com/basics' },
+      { t: 'HTML & CSS Fundamentals', s: 'Frontend, Web', u: 'https://www.freecodecamp.org/learn/2022/responsive-web-design/' },
+      { t: 'JavaScript Basics', s: 'JS, DOM, Events', u: 'https://javascript.info/' },
+      { t: 'Advanced JavaScript (ES6+)', s: 'Promises, Async/Await', u: 'https://youtube.com/playlist?list=PLlasXeu85E9cQ32gLCvAvr9vNaUccPVNP' },
+      { t: 'React.js Components', s: 'React, JSX, Props', u: 'https://react.dev/learn' },
+      { t: 'React Hooks & State', s: 'Hooks, Context', u: 'https://www.youtube.com/watch?v=TNhaISOUy6Q' },
+      { t: 'Node.js & Express Basics', s: 'Backend, APIs', u: 'https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs' },
+      { t: 'Building RESTful APIs', s: 'REST, HTTP', u: 'https://www.youtube.com/watch?v=pKd0Rpw7O48' },
+      
+      { t: 'Object Oriented Programming', s: 'OOP, Classes', u: 'https://refactoring.guru/design-patterns' },
+      { t: 'Design Patterns', s: 'Singleton, Factory', u: 'https://www.youtube.com/watch?v=v9ejT8FO-7I' },
+      { t: 'Low-Level System Design (LLD)', s: 'LLD, UML', u: 'https://github.com/prasadgujar/low-level-design-primer' },
+      { t: 'High-Level System Design (HLD)', s: 'HLD, Scalability', u: 'https://github.com/donnemartin/system-design-primer' },
+      { t: 'Caching & Redis', s: 'Caching, Redis', u: 'https://www.youtube.com/watch?v=jgpVdJB2sKQ' },
+      { t: 'Message Queues (Kafka/RabbitMQ)', s: 'Async, Queues', u: 'https://www.youtube.com/watch?v=Ch5VhJzaoaI' },
+      { t: 'Microservices Architecture', s: 'Microservices, APIs', u: 'https://www.youtube.com/watch?v=rv4LlOgsCEw' },
+      { t: 'Computer Networks Basics', s: 'OSI, TCP/IP', u: 'https://youtube.com/playlist?list=PLBlnK6fEyqRgMCUAGOsZP4EQIvQFSxA7k' },
+      { t: 'Operating Systems (Processes)', s: 'OS, Threads', u: 'https://youtube.com/playlist?list=PLxCzCOWd7aiGz9donHRrE9I3Mwn6XdP8p' },
+      { t: 'Operating Systems (Memory)', s: 'Paging, Virtual Memory', u: 'https://www.youtube.com/watch?v=qcBIvnHtFKA' },
+      { t: 'Git & Version Control', s: 'Git, GitHub', u: 'https://learngitbranching.js.org/' },
+      { t: 'Docker & Containerization', s: 'Docker, Containers', u: 'https://www.youtube.com/watch?v=3c-iBn73dDE' },
+      
+      { t: 'Cloud Basics (AWS/GCP)', s: 'Cloud, EC2, S3', u: 'https://youtube.com/watch?v=3hLmDS179YE' },
+      { t: 'CI/CD Pipelines', s: 'GitHub Actions, Jenkins', u: 'https://www.youtube.com/watch?v=R8_veQiYBjI' },
+      { t: 'Quantitative Aptitude 1', s: 'Math, Logic', u: 'https://www.indiabix.com/aptitude/questions-and-answers/' },
+      { t: 'Quantitative Aptitude 2', s: 'Speed, Time, Work', u: 'https://youtube.com/playlist?list=PLpyc33gOcbVA4qXMoQ5vmhefTruk5t9lt' },
+      { t: 'Logical Reasoning', s: 'Puzzles, Sequences', u: 'https://www.indiabix.com/logical-reasoning/questions-and-answers/' },
+      { t: 'Verbal Ability & Comprehension', s: 'English, Grammar', u: 'https://www.geeksforgeeks.org/verbal-ability/' },
+      { t: 'Resume Building & ATS', s: 'Resume, Formatting', u: 'https://www.youtube.com/watch?v=u75hUSShvnc' },
+      { t: 'Mock Interviews (Pramp)', s: 'Communication, Peer Mock', u: 'https://www.pramp.com/' },
+      { t: 'Behavioral Interviews (STAR)', s: 'HR, STAR Method', u: 'https://www.youtube.com/watch?v=8PjwO2b_3oE' },
+      { t: 'Company Specific Preparation', s: 'Archives, Previous Papers', u: 'https://practice.geeksforgeeks.org/company-tags' },
+      { t: 'Final Revision (DSA & CS)', s: 'Revision, Core', u: 'https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/' },
+      { t: 'Interview Readiness & Negotiation', s: 'Confidence, Salary', u: 'https://www.youtube.com/watch?v=XY5SeCl_8NE' }
+    ];
+
     const fallbackWeeks = [];
-    for(let i=1; i<=targetWeeks; i++) {
-      fallbackWeeks.push({ week: i, topic: i%2===0?"Data Structures & Algorithms":"System Design & Projects", skills: ["DSA", "Problem Solving"], resources: [{title:"Blind 75 LeetCode", url:"https://leetcode.com/discuss/general-discussion/460599/blind-75-leetcode-questions", type:"link"}, {title:"HackerRank", url:"https://www.hackerrank.com", type:"link"}], estimatedHours: 10 });
+    for (let i = 1; i <= targetWeeks; i++) {
+      const idx = (i - 1) % 48; // Ensure we always have distinct content up to 48 weeks
+      const wData = template[idx];
+      fallbackWeeks.push({ 
+        week: i, 
+        topic: wData.t, 
+        skills: wData.s.split(', '), 
+        resources: [{
+           title: wData.t + " Guide", 
+           url: wData.u, 
+           type: wData.u.includes('youtube') ? 'video' : 'link'
+        }], 
+        estimatedHours: 10 
+      });
     }
     return { placementScore: 60, scoreReason: "Generated fallback roadmap due to high AI traffic.", skillGaps: ["Advanced DSA", "System Design"], roadmap: fallbackWeeks, immediateActions: ["Start with Arrays and Strings", "Practice SQL queries daily"], encouragement: "Stay consistent and keep coding!" };
   }
