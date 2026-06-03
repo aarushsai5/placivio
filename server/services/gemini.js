@@ -9,7 +9,7 @@ async function callGemini(prompt, jsonMode = true, maxRetries = 1) {
   for (const model of MODELS) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 25000); // 25s timeout
+      const timeout = setTimeout(() => controller.abort(), 50000); // 50s timeout
 
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
@@ -60,7 +60,7 @@ async function callGemini(prompt, jsonMode = true, maxRetries = 1) {
       } catch (error) {
         clearTimeout(timeout);
         if (error.name === 'AbortError') {
-          console.log(`⚠️ [${model}] Request timed out after 25s.`);
+          console.log(`⚠️ [${model}] Request timed out after 50s.`);
           if (attempt < maxRetries) continue;
           break; // Try next model on timeout
         }
