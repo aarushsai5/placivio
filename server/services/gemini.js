@@ -87,133 +87,155 @@ function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 // ── Roadmap ──
 async function generateRoadmap(studentProfile) {
-  const { name, college, branch, semester, cgpa, skills, targetCompanies, timeline } = studentProfile;
+  const { TOPIC_RESOURCES, PRODUCT_CURRICULUM, SERVICE_CURRICULUM, STARTUP_CURRICULUM } = require('../config/topicResources');
+
+  const { name, college, branch, semester, cgpa, skills, targetCompanies, targetCompanyType, timeline } = studentProfile;
   
+  // 1. Parse timeline → target weeks
   let targetWeeks = 12;
   const t = (timeline || '').toLowerCase();
   if (t.includes('6 month')) targetWeeks = 24;
   if (t.includes('1 year')) targetWeeks = 48;
   if (t.includes('3 month')) targetWeeks = 12;
 
-  const prompt = `You are Placivio, an expert placement coach for Indian engineering students.
-Student: ${name} | ${branch} | CGPA ${cgpa}
-Skills: ${skills.join(', ')}
-Target Companies: ${targetCompanies.join(', ')}
-Timeline: ${timeline}
-
-Analyze skills, identify gaps, and create a comprehensive, highly detailed week-by-week roadmap.
-CRITICAL VERCEL TIMEOUT CONSTRAINT: You MUST generate EXACTLY ${Math.min(targetWeeks, 12)} weeks (no more, to prevent timeout). 
-You MUST provide high-quality REAL URLs for resources (e.g., https://leetcode.com, https://hackerrank.com, https://youtube.com, real tutorial links).
-
-JSON format:
-{"placementScore":number,"scoreReason":"string","skillGaps":["array"],"roadmap":[{"week":number,"topic":"string","skills":["array"],"resources":[{"title":"string","url":"string","type":"string"}],"estimatedHours":number}],"immediateActions":["3 strings"],"encouragement":"string"}`;
-
-  try {
-    const text = await callGemini(prompt, true);
-    const data = JSON.parse(text);
-    
-    // Expand to target weeks if necessary (bypasses physical cloud timeouts)
-    if (targetWeeks > 12 && data.roadmap && data.roadmap.length > 0) {
-       const expandedRoadmap = [];
-       const factor = Math.floor(targetWeeks / data.roadmap.length) || 1;
-       let weekIndex = 1;
-       
-       for (const w of data.roadmap) {
-          for (let i = 0; i < factor; i++) {
-             const newW = JSON.parse(JSON.stringify(w));
-             newW.week = weekIndex++;
-             if (factor > 1) {
-                newW.topic = newW.topic + (i === 0 ? ' (Part 1)' : (i === 1 ? ' (Part 2)' : ` (Part ${i+1})`));
-                newW.estimatedHours = Math.round(newW.estimatedHours / factor) || 5;
-             }
-             expandedRoadmap.push(newW);
-          }
-       }
-       while (expandedRoadmap.length < targetWeeks) {
-          const lastW = expandedRoadmap[expandedRoadmap.length - 1];
-          const newW = JSON.parse(JSON.stringify(lastW));
-          newW.week = weekIndex++;
-          newW.topic = newW.topic + ' (Revision)';
-          expandedRoadmap.push(newW);
-       }
-       data.roadmap = expandedRoadmap;
-    }
-    return data;
-  } catch (error) {
-    console.error('Failed to parse roadmap JSON:', error);
-    // Realistic fallback to prevent empty roadmaps on timeout/quota issues
-    const template = [
-      { t: 'Arrays & Strings', s: 'Arrays, Strings', u: 'https://leetcode.com/explore/learn/card/array-and-string/' },
-      { t: 'Hash Maps & Sets', s: 'Hashing, Optimization', u: 'https://youtube.com/watch?v=H75Qp7RQCFQ' },
-      { t: 'Linked Lists Fundamentals', s: 'Linked Lists, Pointers', u: 'https://youtube.com/watch?v=qT4qIvtDqYQ' },
-      { t: 'Stacks & Queues', s: 'Stacks, Queues', u: 'https://www.hackerrank.com/domains/data-structures' },
-      { t: 'Binary Trees & Traversals', s: 'Trees, Recursion', u: 'https://leetcode.com/explore/learn/card/data-structure-tree/' },
-      { t: 'Binary Search Trees', s: 'BST, Search', u: 'https://www.youtube.com/watch?v=pYT9F8_LFTM' },
-      { t: 'Heaps & Priority Queues', s: 'Heaps', u: 'https://www.youtube.com/watch?v=t0Cq6tVNRBA' },
-      { t: 'Graph Traversal (BFS/DFS)', s: 'Graphs, BFS, DFS', u: 'https://takeuforward.org/graph/striver-graph-series-top-algorithms/' },
-      { t: 'Shortest Path Algorithms', s: 'Dijkstra, Bellman-Ford', u: 'https://www.youtube.com/watch?v=EFg3u_E6eHU' },
-      { t: 'Dynamic Programming: 1D', s: 'DP, Memoization', u: 'https://leetcode.com/discuss/general-discussion/458695/dynamic-programming-patterns' },
-      { t: 'Dynamic Programming: 2D', s: 'DP, Tabulation', u: 'https://www.youtube.com/watch?v=nqowUJzG-iM' },
-      { t: 'Greedy Algorithms', s: 'Greedy, Optimization', u: 'https://www.hackerearth.com/practice/algorithms/greedy/basics-of-greedy-algorithms/tutorial/' },
-      
-      { t: 'SQL Basics & Selects', s: 'SQL, Queries', u: 'https://sqlzoo.net/' },
-      { t: 'SQL Joins & Aggregations', s: 'SQL, Joins, Group By', u: 'https://mode.com/sql-tutorial/' },
-      { t: 'Advanced SQL & Subqueries', s: 'Window Functions, Subqueries', u: 'https://www.hackerrank.com/domains/sql' },
-      { t: 'Database Normalization', s: 'DBMS, 1NF, 2NF, 3NF', u: 'https://www.youtube.com/watch?v=GFQaEYEc8_8' },
-      { t: 'NoSQL Databases (MongoDB)', s: 'NoSQL, JSON', u: 'https://www.mongodb.com/basics' },
-      { t: 'HTML & CSS Fundamentals', s: 'Frontend, Web', u: 'https://www.freecodecamp.org/learn/2022/responsive-web-design/' },
-      { t: 'JavaScript Basics', s: 'JS, DOM, Events', u: 'https://javascript.info/' },
-      { t: 'Advanced JavaScript (ES6+)', s: 'Promises, Async/Await', u: 'https://youtube.com/playlist?list=PLlasXeu85E9cQ32gLCvAvr9vNaUccPVNP' },
-      { t: 'React.js Components', s: 'React, JSX, Props', u: 'https://react.dev/learn' },
-      { t: 'React Hooks & State', s: 'Hooks, Context', u: 'https://www.youtube.com/watch?v=TNhaISOUy6Q' },
-      { t: 'Node.js & Express Basics', s: 'Backend, APIs', u: 'https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs' },
-      { t: 'Building RESTful APIs', s: 'REST, HTTP', u: 'https://www.youtube.com/watch?v=pKd0Rpw7O48' },
-      
-      { t: 'Object Oriented Programming', s: 'OOP, Classes', u: 'https://refactoring.guru/design-patterns' },
-      { t: 'Design Patterns', s: 'Singleton, Factory', u: 'https://www.youtube.com/watch?v=v9ejT8FO-7I' },
-      { t: 'Low-Level System Design (LLD)', s: 'LLD, UML', u: 'https://github.com/prasadgujar/low-level-design-primer' },
-      { t: 'High-Level System Design (HLD)', s: 'HLD, Scalability', u: 'https://github.com/donnemartin/system-design-primer' },
-      { t: 'Caching & Redis', s: 'Caching, Redis', u: 'https://www.youtube.com/watch?v=jgpVdJB2sKQ' },
-      { t: 'Message Queues (Kafka/RabbitMQ)', s: 'Async, Queues', u: 'https://www.youtube.com/watch?v=Ch5VhJzaoaI' },
-      { t: 'Microservices Architecture', s: 'Microservices, APIs', u: 'https://www.youtube.com/watch?v=rv4LlOgsCEw' },
-      { t: 'Computer Networks Basics', s: 'OSI, TCP/IP', u: 'https://youtube.com/playlist?list=PLBlnK6fEyqRgMCUAGOsZP4EQIvQFSxA7k' },
-      { t: 'Operating Systems (Processes)', s: 'OS, Threads', u: 'https://youtube.com/playlist?list=PLxCzCOWd7aiGz9donHRrE9I3Mwn6XdP8p' },
-      { t: 'Operating Systems (Memory)', s: 'Paging, Virtual Memory', u: 'https://www.youtube.com/watch?v=qcBIvnHtFKA' },
-      { t: 'Git & Version Control', s: 'Git, GitHub', u: 'https://learngitbranching.js.org/' },
-      { t: 'Docker & Containerization', s: 'Docker, Containers', u: 'https://www.youtube.com/watch?v=3c-iBn73dDE' },
-      
-      { t: 'Cloud Basics (AWS/GCP)', s: 'Cloud, EC2, S3', u: 'https://youtube.com/watch?v=3hLmDS179YE' },
-      { t: 'CI/CD Pipelines', s: 'GitHub Actions, Jenkins', u: 'https://www.youtube.com/watch?v=R8_veQiYBjI' },
-      { t: 'Quantitative Aptitude 1', s: 'Math, Logic', u: 'https://www.indiabix.com/aptitude/questions-and-answers/' },
-      { t: 'Quantitative Aptitude 2', s: 'Speed, Time, Work', u: 'https://youtube.com/playlist?list=PLpyc33gOcbVA4qXMoQ5vmhefTruk5t9lt' },
-      { t: 'Logical Reasoning', s: 'Puzzles, Sequences', u: 'https://www.indiabix.com/logical-reasoning/questions-and-answers/' },
-      { t: 'Verbal Ability & Comprehension', s: 'English, Grammar', u: 'https://www.geeksforgeeks.org/verbal-ability/' },
-      { t: 'Resume Building & ATS', s: 'Resume, Formatting', u: 'https://www.youtube.com/watch?v=u75hUSShvnc' },
-      { t: 'Mock Interviews (Pramp)', s: 'Communication, Peer Mock', u: 'https://www.pramp.com/' },
-      { t: 'Behavioral Interviews (STAR)', s: 'HR, STAR Method', u: 'https://www.youtube.com/watch?v=8PjwO2b_3oE' },
-      { t: 'Company Specific Preparation', s: 'Archives, Previous Papers', u: 'https://practice.geeksforgeeks.org/company-tags' },
-      { t: 'Final Revision (DSA & CS)', s: 'Revision, Core', u: 'https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/' },
-      { t: 'Interview Readiness & Negotiation', s: 'Confidence, Salary', u: 'https://www.youtube.com/watch?v=XY5SeCl_8NE' }
-    ];
-
-    const fallbackWeeks = [];
-    for (let i = 1; i <= targetWeeks; i++) {
-      const idx = (i - 1) % 48; // Ensure we always have distinct content up to 48 weeks
-      const wData = template[idx];
-      fallbackWeeks.push({ 
-        week: i, 
-        topic: wData.t, 
-        skills: wData.s.split(', '), 
-        resources: [{
-           title: wData.t + " Guide", 
-           url: wData.u, 
-           type: wData.u.includes('youtube') ? 'video' : 'link'
-        }], 
-        estimatedHours: 10 
-      });
-    }
-    return { placementScore: 60, scoreReason: "Generated fallback roadmap due to high AI traffic.", skillGaps: ["Advanced DSA", "System Design"], roadmap: fallbackWeeks, immediateActions: ["Start with Arrays and Strings", "Practice SQL queries daily"], encouragement: "Stay consistent and keep coding!" };
+  // 2. Detect company type → select curriculum template
+  const types = (targetCompanyType || []).map(c => c.toLowerCase());
+  let curriculum;
+  if (types.some(c => c.includes('product'))) {
+    curriculum = PRODUCT_CURRICULUM;
+  } else if (types.some(c => c.includes('startup'))) {
+    curriculum = STARTUP_CURRICULUM;
+  } else if (types.some(c => c.includes('service'))) {
+    curriculum = SERVICE_CURRICULUM;
+  } else {
+    // Default: product-focused (strongest preparation)
+    curriculum = PRODUCT_CURRICULUM;
   }
+
+  // 3. Skill gap analysis — identify topics the student already knows
+  const studentSkillsNorm = (skills || []).map(s => s.toLowerCase().trim());
+  
+  function isTopicMastered(topicKey) {
+    const topicData = TOPIC_RESOURCES[topicKey];
+    if (!topicData) return false;
+    const topicSkills = (topicData.skills || []).map(s => s.toLowerCase().trim());
+    // Student has mastered this topic if they know ≥ 60% of its skills
+    const matched = topicSkills.filter(ts =>
+      studentSkillsNorm.some(ss => ss === ts || ss.includes(ts) || ts.includes(ss))
+    );
+    return topicSkills.length > 0 && (matched.length / topicSkills.length) >= 0.6;
+  }
+
+  // 4. Build the roadmap from curriculum, prioritizing gaps
+  // First pass: separate into gap topics and mastered topics
+  const gapTopics = [];
+  const masteredTopics = [];
+  const seen = new Set();
+
+  for (const topicKey of curriculum.slice(0, targetWeeks)) {
+    const topicData = TOPIC_RESOURCES[topicKey];
+    if (!topicData) continue;
+    
+    if (isTopicMastered(topicKey)) {
+      if (!seen.has(topicKey + '_m')) {
+        masteredTopics.push(topicKey);
+        seen.add(topicKey + '_m');
+      }
+    } else {
+      gapTopics.push(topicKey); // Allow duplicates for deeper study
+    }
+  }
+
+  // Build final week sequence: gaps first, then mastered topics for revision
+  let weekSequence = [...gapTopics];
+  let mi = 0;
+  while (weekSequence.length < targetWeeks) {
+    if (mi < masteredTopics.length) {
+      weekSequence.push(masteredTopics[mi++]);
+    } else if (gapTopics.length > 0) {
+      // Cycle through gap topics for more practice
+      weekSequence.push(gapTopics[weekSequence.length % gapTopics.length]);
+    } else {
+      weekSequence.push(curriculum[weekSequence.length % curriculum.length]);
+    }
+  }
+  weekSequence = weekSequence.slice(0, targetWeeks);
+
+  // 5. Build weeks with curated resources from config
+  const topicAppearCount = {};
+  const weeks = weekSequence.map((topicKey, i) => {
+    const topicData = TOPIC_RESOURCES[topicKey] || TOPIC_RESOURCES['arrays'];
+    topicAppearCount[topicKey] = (topicAppearCount[topicKey] || 0) + 1;
+    const count = topicAppearCount[topicKey];
+
+    let topicLabel = topicData.topic;
+    if (count === 2) topicLabel += ' — Advanced Practice';
+    if (count === 3) topicLabel += ' — Mock & Revision';
+    if (count >= 4) topicLabel += ` — Deep Dive ${count}`;
+
+    // Calculate hours based on timeline compression
+    const baseHours = targetWeeks <= 12 ? 15 : targetWeeks <= 24 ? 10 : 8;
+
+    return {
+      weekNumber: i + 1,
+      topic: topicLabel,
+      skills: topicData.skills || [],
+      resources: topicData.resources.map(r => ({
+        title: r.title,
+        url: r.url,
+        type: r.type,
+      })),
+      estimatedHours: baseHours,
+      completed: false,
+    };
+  });
+
+  // 6. Compute skill gaps
+  const allCurriculumSkills = new Set();
+  weekSequence.forEach(tk => {
+    const td = TOPIC_RESOURCES[tk];
+    if (td) td.skills.forEach(s => allCurriculumSkills.add(s));
+  });
+  const skillGaps = [...allCurriculumSkills].filter(s =>
+    !studentSkillsNorm.some(ss => ss === s.toLowerCase() || ss.includes(s.toLowerCase()) || s.toLowerCase().includes(ss))
+  );
+
+  // 7. Use AI ONLY for personalized scoring & encouragement (tiny prompt, fast)
+  let aiAnalysis = null;
+  try {
+    const scoringPrompt = `You are Placivio, an expert placement coach. Give a brief analysis for this student.
+
+Student: ${name} | ${branch} | CGPA ${cgpa} | Semester ${semester}
+Skills: ${(skills || []).join(', ')}
+Target Companies: ${(targetCompanies || []).join(', ')} (${(targetCompanyType || []).join(', ')})
+Timeline: ${timeline}
+Identified Skill Gaps: ${skillGaps.slice(0, 8).join(', ')}
+Roadmap: ${targetWeeks} weeks planned
+
+Return JSON ONLY:
+{"placementScore":number 0-100,"scoreReason":"1 sentence","immediateActions":["action1","action2","action3"],"encouragement":"1 motivational sentence"}`;
+
+    const text = await callGemini(scoringPrompt, true);
+    aiAnalysis = JSON.parse(text);
+  } catch (err) {
+    console.log('AI scoring fallback:', err.message);
+  }
+
+  // 8. Return the complete roadmap
+  const placementScore = aiAnalysis?.placementScore || Math.min(95, Math.round(30 + (cgpa || 5) * 4 + (skills?.length || 0) * 2));
+  
+  return {
+    placementScore,
+    scoreReason: aiAnalysis?.scoreReason || `Based on your ${branch} background, CGPA ${cgpa}, and ${(skills || []).length} skills.`,
+    skillGaps: skillGaps.slice(0, 10),
+    roadmap: weeks.map(w => ({ week: w.weekNumber, topic: w.topic, skills: w.skills, resources: w.resources, estimatedHours: w.estimatedHours })),
+    immediateActions: aiAnalysis?.immediateActions || [
+      `Start with Week 1: ${weeks[0]?.topic || 'Arrays'}`,
+      'Set up a LeetCode account and solve 2 problems daily',
+      'Create a study schedule and stick to it',
+    ],
+    encouragement: aiAnalysis?.encouragement || `You have ${timeline} to prepare — that's plenty of time with a solid plan. Let's go! 🚀`,
+  };
 }
 
 // ── Feedback ──
@@ -242,6 +264,12 @@ async function chatWithAgent(student, roadmap, progressHistory, message, drives 
   const completedWeeks = roadmap ? roadmap.weeks.filter(w => w.completed).length : 0;
   const totalHours = progressHistory.reduce((sum, p) => sum + (p.hoursSpent || 0), 0);
 
+  // Find current week (first incomplete week)
+  const currentWeek = roadmap?.weeks?.find(w => !w.completed);
+  const currentWeekInfo = currentWeek
+    ? `Week ${currentWeek.weekNumber}: ${currentWeek.topic}`
+    : 'All weeks completed';
+
   let driveContext = '';
   if (drives.length > 0) {
     driveContext = '\n\nUpcoming Campus Drives at their college:\n' + drives.slice(0, 5).map(d => {
@@ -253,18 +281,28 @@ async function chatWithAgent(student, roadmap, progressHistory, message, drives 
     }).join('\n');
   }
 
-  const prompt = `You are Placivio, a personal AI placement coach. You're chatting with ${student.name}.
+  const prompt = `You are an AI placement coach for ${student.name}, a ${student.branch} student at ${student.college} in Semester ${student.semester}.
+Their target is ${(student.targetCompanyType || []).join(', ') || 'not specified'} companies (${(student.targetCompanies || []).join(', ') || 'not specified'}).
+They have ${student.timeline || '6 months'} left for placements.
+CGPA: ${student.cgpa}/10
 
-Profile: ${student.college} | ${student.branch} | Sem ${student.semester} | CGPA ${student.cgpa}
-Skills: ${(student.skills || []).join(', ')}
-Target Companies: ${(student.targetCompanies || []).join(', ')}
-Score: ${student.placementScore}/100 | Progress: ${completedWeeks}/${roadmap?.totalWeeks || 0} weeks | Hours: ${totalHours}
-Skill Gaps: ${roadmap?.skillGaps?.join(', ') || 'Not analyzed'}
+Current skills: ${(student.skills || []).join(', ') || 'None listed'}
+Weak areas / Skill gaps: ${roadmap?.skillGaps?.join(', ') || 'Not analyzed yet'}
+Placement readiness score: ${student.placementScore}/100
+
+Progress: ${completedWeeks}/${roadmap?.totalWeeks || 0} weeks completed | ${totalHours} total study hours
+Currently on: ${currentWeekInfo}
 ${driveContext}
 
 Student asks: "${message}"
 
-Be helpful, specific, encouraging. Reference their real data. If asking about drives/companies, give specific match % and what skills to learn. Be concise.`;
+RULES:
+- NEVER give generic advice. ALWAYS reference their specific data above.
+- Mention their current week topic, skill gaps, and target companies by name.
+- If they ask about a drive/company, calculate and state their match percentage.
+- Give specific, actionable next steps (e.g., "solve LC #200 Number of Islands" not "practice DSA").
+- Be encouraging but honest about gaps.
+- Keep responses concise (2-4 paragraphs max).`;
 
   try {
     return await callGemini(prompt, false);
