@@ -78,6 +78,7 @@ export default function Dashboard() {
   const { addToast } = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [openWeek, setOpenWeek] = useState(null);
 
   useEffect(() => { fetchDashboard(); }, [studentId]);
@@ -92,6 +93,25 @@ export default function Dashboard() {
       }
     } catch { addToast('Failed to load dashboard.', 'error'); }
     finally { setLoading(false); }
+  };
+
+  const handleGenerateRoadmap = async () => {
+    setGenerating(true);
+    addToast('Generating AI roadmap... This may take ~10-15 seconds.', 'info');
+    try {
+      const res = await fetch(`/api/roadmap/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId })
+      });
+      if (!res.ok) throw new Error('Failed');
+      addToast('Roadmap generated successfully! 🚀', 'success');
+      fetchDashboard();
+    } catch {
+      addToast('Failed to generate roadmap. Please try again.', 'error');
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const handleCompleteWeek = async (wn) => {
@@ -204,16 +224,31 @@ export default function Dashboard() {
               </Link>
             </div>
 
-            {roadmap?.weeks?.map((week) => (
-              <WeekAccordion
-                key={week.weekNumber}
-                week={week}
-                isOpen={openWeek === week.weekNumber}
-                onToggle={() => setOpenWeek(openWeek === week.weekNumber ? null : week.weekNumber)}
-                onComplete={handleCompleteWeek}
-                isCurrent={roadmap.weeks.find(w => !w.completed)?.weekNumber === week.weekNumber}
-              />
-            ))}
+            {(!roadmap?.weeks || roadmap.weeks.length === 0) ? (
+              <div className="glass-card p-12 text-center">
+                <Sparkles className="w-12 h-12 text-orange-500 mx-auto mb-4 animate-bounce-soft" />
+                <h3 className="text-xl font-bold text-slate-800 mb-2">No Roadmap Generated Yet</h3>
+                <p className="text-slate-600 mb-6">Our AI is ready to build your personalized placement roadmap.</p>
+                <button 
+                  onClick={handleGenerateRoadmap} 
+                  disabled={generating}
+                  className="btn-primary w-full sm:w-auto"
+                >
+                  {generating ? 'Generating...' : 'Generate Roadmap Now 🚀'}
+                </button>
+              </div>
+            ) : (
+              roadmap.weeks.map((week) => (
+                <WeekAccordion
+                  key={week.weekNumber}
+                  week={week}
+                  isOpen={openWeek === week.weekNumber}
+                  onToggle={() => setOpenWeek(openWeek === week.weekNumber ? null : week.weekNumber)}
+                  onComplete={handleCompleteWeek}
+                  isCurrent={roadmap.weeks.find(w => !w.completed)?.weekNumber === week.weekNumber}
+                />
+              ))
+            )}
           </div>
 
           {/* Right Column */}

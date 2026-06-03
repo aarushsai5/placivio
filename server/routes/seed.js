@@ -71,8 +71,16 @@ router.post('/', async (req, res) => {
     for (let i = 0; i < 25; i++) {
       const fName = firstNames[i];
       const lName = lastNames[getRandomInt(0, lastNames.length - 1)];
-      const cgpa = (getRandomInt(50, 98) / 10).toFixed(1);
-      
+      let cgpa = (getRandomInt(50, 98) / 10).toFixed(1);
+      let branch = ['CSE', 'IT', 'ECE', 'ME'][getRandomInt(0, 3)];
+      let placementScore = getRandomInt(40, 95);
+
+      // Hardcode first 4 users based on user request
+      if (i === 0) { branch = 'CSE'; cgpa = 9.2; placementScore = 88; } // Aarav: High Readiness
+      if (i === 1) { branch = 'CSE'; cgpa = 7.5; placementScore = 65; } // Diya: Mid Readiness
+      if (i === 2) { branch = 'ECE'; cgpa = 6.8; placementScore = 55; } // Kabir: Mid Readiness
+      if (i === 3) { branch = 'IT'; cgpa = 5.5; placementScore = 30; }  // Ananya: Needs Attention
+
       let targetType = ['Service Based'];
       if (cgpa > 8) targetType = ['Product Based', 'Startup'];
       else if (cgpa > 7) targetType = ['Product Based', 'Service Based'];
@@ -82,7 +90,7 @@ router.post('/', async (req, res) => {
         email: `${fName.toLowerCase()}@student.edu`,
         password: 'password123',
         college: 'VIT Vellore',
-        branch: ['CSE', 'IT', 'ECE', 'ME'][getRandomInt(0, 3)],
+        branch: branch,
         semester: '7th',
         cgpa: parseFloat(cgpa),
         skills: getRandomSkills(),
@@ -90,7 +98,7 @@ router.post('/', async (req, res) => {
         targetCompanyType: targetType,
         timeline: ['3 months', '6 months', '1 year'][getRandomInt(0, 2)],
         profileCompleted: true,
-        placementScore: getRandomInt(40, 95)
+        placementScore: placementScore
       });
     }
 
