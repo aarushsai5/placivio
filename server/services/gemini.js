@@ -95,8 +95,8 @@ Current Skills: ${skills.join(', ')}
 Target Companies: ${targetCompanies.join(', ')}
 Timeline: ${timeline}
 
-Analyze skills, identify gaps for target companies, and create a comprehensive, detailed week-by-week roadmap.
-CRITICAL: To ensure fast generation, you MUST generate EXACTLY 8 distinct weeks of training content, leading up to their placement. Provide 3 free resources (YouTube/docs) per week. Give a score 0-100 and 3 immediate actions.
+Analyze skills, identify gaps for target companies, and create a comprehensive, detailed week-by-week roadmap strictly based on the user's timeline (${timeline}).
+CRITICAL: To ensure our systems can process the roadmap instantly, you MUST generate an intensive "Phase 1" roadmap consisting of EXACTLY 8 weeks of training content, tailored to their ${timeline} goal. Provide 3 free resources (YouTube/docs) per week. Give a score 0-100 and 3 immediate actions.
 
 JSON format:
 {"placementScore":number,"scoreReason":"string","skillGaps":["array"],"roadmap":[{"week":number,"topic":"string","skills":["array"],"resources":[{"title":"string","url":"string","type":"string"}],"estimatedHours":number}],"immediateActions":["3 strings"],"encouragement":"string"}`;
