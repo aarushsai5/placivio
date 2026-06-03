@@ -5,6 +5,42 @@ import { useToast } from '../context/ToastContext';
 import { getDrivesForCollege, applyToDrive, getStudentApplications } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+const COMPANY_COLORS = {
+  'Google': { bg: 'from-blue-500 to-green-500', letter: 'G' },
+  'Microsoft': { bg: 'from-blue-600 to-cyan-500', letter: 'M' },
+  'Amazon': { bg: 'from-amber-500 to-orange-600', letter: 'A' },
+  'TCS': { bg: 'from-indigo-600 to-blue-500', letter: 'T' },
+  'Infosys': { bg: 'from-blue-500 to-indigo-600', letter: 'I' },
+  'Wipro': { bg: 'from-purple-600 to-violet-500', letter: 'W' },
+  'Flipkart': { bg: 'from-yellow-500 to-blue-600', letter: 'F' },
+  'Razorpay': { bg: 'from-blue-600 to-indigo-700', letter: 'R' },
+  'Zomato': { bg: 'from-red-500 to-rose-600', letter: 'Z' },
+  'PhonePe': { bg: 'from-purple-600 to-indigo-600', letter: 'P' },
+  'Accenture': { bg: 'from-violet-600 to-purple-500', letter: 'A' },
+  'Deloitte': { bg: 'from-green-600 to-emerald-500', letter: 'D' },
+  'Adobe': { bg: 'from-red-600 to-rose-500', letter: 'A' },
+  'Paytm': { bg: 'from-cyan-500 to-blue-600', letter: 'P' },
+  'CRED': { bg: 'from-slate-600 to-zinc-700', letter: 'C' },
+};
+
+const COMPANY_LOGOS = {
+  'Google': 'https://logo.clearbit.com/google.com?size=120',
+  'Microsoft': 'https://logo.clearbit.com/microsoft.com?size=120',
+  'Amazon': 'https://logo.clearbit.com/amazon.com?size=120',
+  'TCS': 'https://logo.clearbit.com/tcs.com?size=120',
+  'Infosys': 'https://logo.clearbit.com/infosys.com?size=120',
+  'Wipro': 'https://logo.clearbit.com/wipro.com?size=120',
+  'Flipkart': 'https://logo.clearbit.com/flipkart.com?size=120',
+  'Razorpay': 'https://logo.clearbit.com/razorpay.com?size=120',
+  'Zomato': 'https://logo.clearbit.com/zomato.com?size=120',
+  'PhonePe': 'https://logo.clearbit.com/phonepe.com?size=120',
+  'Accenture': 'https://logo.clearbit.com/accenture.com?size=120',
+  'Deloitte': 'https://logo.clearbit.com/deloitte.com?size=120',
+  'Adobe': 'https://logo.clearbit.com/adobe.com?size=120',
+  'Paytm': 'https://logo.clearbit.com/paytm.com?size=120',
+  'CRED': 'https://logo.clearbit.com/cred.club?size=120',
+};
+
 export default function Drives() {
   const { user } = useAuth();
   const { addToast } = useToast();
@@ -123,8 +159,26 @@ export default function Drives() {
             return (
               <div key={drive._id} className="glass-card overflow-hidden">
                 <button onClick={() => setExpandedId(isExpanded ? null : drive._id)} className="w-full p-5 flex items-center gap-5 text-left hover:bg-white/[0.015] transition-all">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl font-bold text-white flex-shrink-0 shadow-md">
-                    {drive.companyName?.[0]}
+                  {/* Company Logo */}
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-white border border-slate-200/80 p-1.5 flex-shrink-0 shadow-md overflow-hidden group-hover:scale-105 group-hover:rotate-2 transition-all duration-300">
+                    {COMPANY_LOGOS[drive.companyName] ? (
+                      <img
+                        src={COMPANY_LOGOS[drive.companyName]}
+                        alt={`${drive.companyName} Logo`}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          const fb = e.target.nextSibling;
+                          if (fb) fb.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className={`w-full h-full rounded-xl bg-gradient-to-br ${(COMPANY_COLORS[drive.companyName] || { bg: 'from-indigo-500 to-purple-600' }).bg} flex items-center justify-center text-xl font-bold text-white`}
+                      style={{ display: COMPANY_LOGOS[drive.companyName] ? 'none' : 'flex' }}
+                    >
+                      {(COMPANY_COLORS[drive.companyName] || { letter: drive.companyName?.[0] }).letter}
+                    </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">

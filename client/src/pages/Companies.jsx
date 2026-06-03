@@ -24,6 +24,24 @@ const COMPANY_COLORS = {
   'CRED': { bg: 'from-slate-600 to-zinc-700', letter: 'C' },
 };
 
+const COMPANY_LOGOS = {
+  'Google': 'https://logo.clearbit.com/google.com?size=120',
+  'Microsoft': 'https://logo.clearbit.com/microsoft.com?size=120',
+  'Amazon': 'https://logo.clearbit.com/amazon.com?size=120',
+  'TCS': 'https://logo.clearbit.com/tcs.com?size=120',
+  'Infosys': 'https://logo.clearbit.com/infosys.com?size=120',
+  'Wipro': 'https://logo.clearbit.com/wipro.com?size=120',
+  'Flipkart': 'https://logo.clearbit.com/flipkart.com?size=120',
+  'Razorpay': 'https://logo.clearbit.com/razorpay.com?size=120',
+  'Zomato': 'https://logo.clearbit.com/zomato.com?size=120',
+  'PhonePe': 'https://logo.clearbit.com/phonepe.com?size=120',
+  'Accenture': 'https://logo.clearbit.com/accenture.com?size=120',
+  'Deloitte': 'https://logo.clearbit.com/deloitte.com?size=120',
+  'Adobe': 'https://logo.clearbit.com/adobe.com?size=120',
+  'Paytm': 'https://logo.clearbit.com/paytm.com?size=120',
+  'CRED': 'https://logo.clearbit.com/cred.club?size=120',
+};
+
 const TYPE_CONFIG = {
   product: { label: 'Product', class: 'bg-emerald-50 text-emerald-700 border-emerald-200', emoji: '🚀' },
   service: { label: 'Service', class: 'bg-blue-50 text-blue-700 border-blue-200', emoji: '🏢' },
@@ -196,8 +214,25 @@ export default function Companies() {
                   className="w-full p-5 sm:p-6 flex items-center gap-4 sm:gap-6 text-left hover:bg-white/[0.015] transition-all duration-300"
                 >
                   {/* Company Logo */}
-                  <div className={`company-logo bg-gradient-to-br ${companyColor.bg}`}>
-                    {companyColor.letter}
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white border border-slate-200/80 p-1.5 flex-shrink-0 shadow-sm overflow-hidden group-hover:scale-105 group-hover:rotate-2 transition-all duration-300">
+                    {COMPANY_LOGOS[company.name] ? (
+                      <img
+                        src={COMPANY_LOGOS[company.name]}
+                        alt={`${company.name} Logo`}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          const fb = e.target.nextSibling;
+                          if (fb) fb.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className={`w-full h-full rounded-xl bg-gradient-to-br ${companyColor.bg} flex items-center justify-center text-lg font-bold text-white`}
+                      style={{ display: COMPANY_LOGOS[company.name] ? 'none' : 'flex' }}
+                    >
+                      {companyColor.letter}
+                    </div>
                   </div>
 
                   {/* Match Ring */}
